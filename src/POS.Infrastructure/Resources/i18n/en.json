@@ -1,0 +1,137 @@
+{
+  "user": {
+    "created": {
+      "successfully": "User created successfully"
+    },
+    "updated": {
+      "successfully": "User updated successfully"
+    },
+    "deactivated": {
+      "successfully": "User deactivated successfully"
+    },
+    "activated": {
+      "successfully": "User activated successfully"
+    },
+    "deleted": {
+      "successfully": "User deleted successfully"
+    },
+    "role": {
+      "assigned": {
+        "successfully": "Role assigned successfully"
+      }
+    },
+    "permission": {
+      "granted": {
+        "successfully": "Permission granted successfully"
+      },
+      "revoked": {
+        "successfully": "Permission revoked successfully"
+      }
+    }
+  },
+  "error": {
+    "user": {
+      "not": {
+        "found": "User not found"
+      }
+    },
+    "email": {
+      "already": {
+        "exists": "Email already exists"
+      }
+    },
+    "invalid": {
+      "email": {
+        "format": "Invalid email format"
+      },
+      "password": "Invalid password",
+      "credentials": "Invalid credentials",
+      "role": "Invalid role"
+    },
+    "user": {
+      "deactivated": "User account is deactivated"
+    },
+    "unauthorized": {
+      "access": "Unauthorized access"
+    },
+    "insufficient": {
+      "permissions": "Insufficient permissions"
+    },
+    "operation": {
+      "failed": "Operation failed"
+    },
+    "database": {
+      "error": "Database error occurred"
+    },
+    "validation": {
+      "error": "Validation error"
+    }
+  },
+  "validation": {
+    "email": {
+      "required": "Email is required",
+      "invalid": "Email format is invalid"
+    },
+    "password": {
+      "required": "Password is required",
+      "too": {
+        "short": "Password must be at least 8 characters"
+      },
+      "special": {
+        "char": "Password must contain at least one special character"
+      },
+      "uppercase": "Password must contain at least one uppercase letter",
+      "number": "Password must contain at least one number"
+    },
+    "fullname": {
+      "required": "Full name is required",
+      "too": {
+        "short": "Full name must be at least 2 characters",
+        "long": "Full name must not exceed 100 characters"
+      }
+    },
+    "role": {
+      "required": "Role is required"
+    },
+    "phone": {
+      "invalid": "Phone number is invalid"
+    },
+    "userid": {
+      "required": "User ID is required"
+    },
+    "permission": {
+      "required": "Permission is required"
+    }
+  },
+  "operation": {
+    "successful": "Operation completed successfully"
+  },
+  "please": {
+    "check": {
+      "your": {
+        "input": "Please check your input"
+      }
+    }
+  },
+  "confirm": {
+    "delete": {
+      "title": "Confirm Delete",
+      "message": "Are you sure you want to delete this item?"
+    }
+  },
+  "button": {
+    "yes": "Yes",
+    "no": "No",
+    "cancel": "Cancel",
+    "save": "Save",
+    "delete": "Delete",
+    "edit": "Edit",
+    "close": "Close"
+  },
+  "loading": "Loading...",
+  "no": {
+    "data": {
+      "available": "No data available"
+    }
+  }
+}

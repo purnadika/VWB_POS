@@ -2,10 +2,12 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Npgsql;
+using POS.Application.Services;
 using POS.Domain.Interfaces.Repositories;
 using POS.Infrastructure.AI;
 using POS.Infrastructure.Persistence;
 using POS.Infrastructure.Persistence.Repositories;
+using POS.Infrastructure.Services;
 
 namespace POS.Infrastructure;
 
@@ -24,11 +26,24 @@ public static class DependencyInjection
 
         // Repositories
         services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
+        services.AddScoped<IUserRepository, UserRepository>();
         services.AddScoped<IItemRepository, ItemRepository>();
         services.AddScoped<ISaleRepository, SaleRepository>();
         services.AddScoped<ICustomerRepository, CustomerRepository>();
         services.AddScoped<IEmployeeRepository, EmployeeRepository>();
         services.AddScoped<IAppConfigRepository, AppConfigRepository>();
+
+        // Services
+        services.AddSingleton<ILocalizationService>(sp =>
+        {
+            var logger = sp.GetRequiredService<Microsoft.Extensions.Logging.ILogger<LocalizationService>>();
+            return new LocalizationService(logger);
+        });
+        services.AddSingleton<ICurrencyService>(sp =>
+        {
+            var logger = sp.GetRequiredService<Microsoft.Extensions.Logging.ILogger<CurrencyService>>();
+            return new CurrencyService(logger);
+        });
 
         // AI client registration
         services.AddPOSAiClient(configuration);

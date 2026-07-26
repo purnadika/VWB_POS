@@ -56,24 +56,23 @@ public class POSDbContext : DbContext, IUnitOfWork
         modelBuilder.Entity<User>(entity =>
         {
             entity.HasKey(u => u.Id);
-
             entity.ToTable("Users", schema: "user_management");
 
-            // Value Objects as owned entities
-            entity.OwnsOne(u => u.Email, email =>
-            {
-                email.Property(e => e.Value)
-                    .HasColumnName("Email")
-                    .HasMaxLength(254)
-                    .IsRequired();
-            });
+            // Value Objects - map directly without creating navigation properties
+            entity.Property(u => u.Email)
+                .HasMaxLength(254)
+                .IsRequired()
+                .HasConversion(
+                    v => v.Value,
+                    v => new Email(v)
+                );
 
-            entity.OwnsOne(u => u.PasswordHash, hash =>
-            {
-                hash.Property(h => h.Hash)
-                    .HasColumnName("PasswordHash")
-                    .IsRequired();
-            });
+            entity.Property(u => u.PasswordHash)
+                .IsRequired()
+                .HasConversion(
+                    v => v.Hash,
+                    v => new PasswordHash(v)
+                );
 
             // Scalar properties
             entity.Property(u => u.Role)
@@ -97,8 +96,11 @@ public class POSDbContext : DbContext, IUnitOfWork
                 .HasMaxLength(254)
                 .HasDefaultValue("SYSTEM");
 
+            // Ignore collection properties (not persisted in this MVP)
+            entity.Ignore(u => u.Permissions);
+
             // Indexes for common queries
-            entity.HasIndex(u => u.Email).IsUnique();
+            entity.HasIndex("Email").IsUnique();  // Email column name
             entity.HasIndex(u => u.IsActive);
             entity.HasIndex(u => u.Role);
             entity.HasIndex(u => u.CreatedAt);

@@ -8,23 +8,40 @@ namespace POS.Infrastructure.Persistence.Repositories;
 
 /// <summary>
 /// Repository implementation for User aggregate.
-/// Handles persistence operations for users.
+/// Handles persistence operations for users with Guid-based IDs.
 /// </summary>
-public class UserRepository : Repository<User>, IUserRepository
+public class UserRepository : IUserRepository
 {
+    private readonly POSDbContext _context;
     private readonly ILogger<UserRepository> _logger;
 
     public UserRepository(POSDbContext context, ILogger<UserRepository> logger)
-        : base(context)
     {
+        _context = context;
         _logger = logger;
+    }
+
+    public IUnitOfWork UnitOfWork => _context;
+
+    public async Task<User?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            var user = await _context.Users.FindAsync(new object[] { id }, cancellationToken: cancellationToken);
+            return user;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError($"Error finding user by ID: {ex.Message}");
+            throw;
+        }
     }
 
     public async Task<User?> FindByEmailAsync(Email email, CancellationToken cancellationToken = default)
     {
         try
         {
-            var user = await DbContext.Set<User>()
+            var user = await _context.Users
                 .FirstOrDefaultAsync(u => u.Email == email, cancellationToken);
 
             return user;
@@ -54,7 +71,7 @@ public class UserRepository : Repository<User>, IUserRepository
     {
         try
         {
-            var users = await DbContext.Set<User>()
+            var users = await _context.Users
                 .Where(u => u.IsActive)
                 .OrderBy(u => u.Email)
                 .ToListAsync(cancellationToken);
@@ -72,7 +89,7 @@ public class UserRepository : Repository<User>, IUserRepository
     {
         try
         {
-            var users = await DbContext.Set<User>()
+            var users = await _context.Users
                 .Where(u => !u.IsActive)
                 .OrderBy(u => u.Email)
                 .ToListAsync(cancellationToken);
@@ -90,7 +107,7 @@ public class UserRepository : Repository<User>, IUserRepository
     {
         try
         {
-            var exists = await DbContext.Set<User>()
+            var exists = await _context.Users
                 .AnyAsync(u => u.Email == email, cancellationToken);
 
             return exists;
@@ -106,7 +123,7 @@ public class UserRepository : Repository<User>, IUserRepository
     {
         try
         {
-            var exists = await DbContext.Set<User>()
+            var exists = await _context.Users
                 .AnyAsync(u => u.Email == email && u.Id != excludeUserId, cancellationToken);
 
             return exists;
@@ -114,6 +131,32 @@ public class UserRepository : Repository<User>, IUserRepository
         catch (Exception ex)
         {
             _logger.LogError($"Error checking if email exists (excluding user): {ex.Message}");
+            throw;
+        }
+    }
+
+    public async Task AddAsync(User user, CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            await _context.Users.AddAsync(user, cancellationToken);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError($"Error adding user: {ex.Message}");
+            throw;
+        }
+    }
+
+    public void Update(User user)
+    {
+        try
+        {
+            _context.Users.Update(user);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError($"Error updating user: {ex.Message}");
             throw;
         }
     }

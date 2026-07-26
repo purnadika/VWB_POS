@@ -1,0 +1,71 @@
+using MediatR;
+using POS.Application.Constants;
+using POS.Application.Features.UserManagement.DTOs;
+using POS.Domain.Common;
+using POS.Domain.Enums;
+
+namespace POS.Application.Features.UserManagement.Commands;
+
+/// <summary>
+/// CQRS Command to create a new user.
+/// Follows single responsibility: only carries input data.
+/// </summary>
+public class CreateUserCommand : IRequest<Result<UserResponse>>
+{
+    public string Email { get; set; } = string.Empty;
+    public string Password { get; set; } = string.Empty;
+    public string ConfirmPassword { get; set; } = string.Empty;
+    public string FullName { get; set; } = string.Empty;
+    public UserRole Role { get; set; }
+    public string? PhoneNumber { get; set; }
+    public string? PreferredLanguage { get; set; } = DefaultValues.DefaultLanguage;
+}
+
+/// <summary>
+/// CQRS Command to assign a role to a user.
+/// </summary>
+public class AssignRoleCommand : IRequest<Result<UserResponse>>
+{
+    public Guid UserId { get; set; }
+    public UserRole NewRole { get; set; }
+    public string? PreferredLanguage { get; set; } = DefaultValues.DefaultLanguage;
+}
+
+/// <summary>
+/// CQRS Command to grant a permission to a user.
+/// </summary>
+public class GrantPermissionCommand : IRequest<Result<UserResponse>>
+{
+    public Guid UserId { get; set; }
+    public PermissionType Permission { get; set; }
+    public string? PreferredLanguage { get; set; } = DefaultValues.DefaultLanguage;
+}
+
+/// <summary>
+/// CQRS Command to deactivate a user.
+/// </summary>
+public class DeactivateUserCommand : IRequest<Result<UserResponse>>
+{
+    public Guid UserId { get; set; }
+    public string? PreferredLanguage { get; set; } = DefaultValues.DefaultLanguage;
+}
+
+/// <summary>
+/// CQRS Command to activate a user.
+/// </summary>
+public class ActivateUserCommand : IRequest<Result<UserResponse>>
+{
+    public Guid UserId { get; set; }
+    public string? PreferredLanguage { get; set; } = DefaultValues.DefaultLanguage;
+}
+
+/// <summary>
+/// CQRS Command to update user profile information.
+/// </summary>
+public class UpdateUserProfileCommand : IRequest<Result<UserResponse>>
+{
+    public Guid UserId { get; set; }
+    public string FullName { get; set; } = string.Empty;
+    public string? PhoneNumber { get; set; }
+    public string? PreferredLanguage { get; set; } = DefaultValues.DefaultLanguage;
+}

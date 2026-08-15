@@ -1,0 +1,148 @@
+﻿using System;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
+using POS.Domain.Aggregates.UserManagement;
+using POS.Domain.Entities;
+using POS.Domain.Interfaces.Repositories;
+using POS.Domain.ValueObjects;
+
+namespace POS.Infrastructure.Persistence;
+
+public class POSDbContext : DbContext, IUnitOfWork
+{
+    public POSDbContext(DbContextOptions<POSDbContext> options) : base(options)
+    {
+    }
+
+    // User Management Aggregate
+    public DbSet<User> Users => Set<User>();
+
+    public DbSet<Person> People => Set<Person>();
+    public DbSet<Customer> Customers => Set<Customer>();
+    public DbSet<Employee> Employees => Set<Employee>();
+    public DbSet<Supplier> Suppliers => Set<Supplier>();
+    public DbSet<Item> Items => Set<Item>();
+    public DbSet<StockLocation> StockLocations => Set<StockLocation>();
+    public DbSet<ItemQuantity> ItemQuantities => Set<ItemQuantity>();
+    public DbSet<ItemKit> ItemKits => Set<ItemKit>();
+    public DbSet<ItemKitItem> ItemKitItems => Set<ItemKitItem>();
+    public DbSet<ItemAttribute> ItemAttributes => Set<ItemAttribute>();
+    public DbSet<ItemAttributeLink> ItemAttributeLinks => Set<ItemAttributeLink>();
+    public DbSet<InventoryTransaction> InventoryTransactions => Set<InventoryTransaction>();
+    public DbSet<Sale> Sales => Set<Sale>();
+    public DbSet<SaleItem> SaleItems => Set<SaleItem>();
+    public DbSet<SalePayment> SalePayments => Set<SalePayment>();
+    public DbSet<SaleTax> SaleTaxes => Set<SaleTax>();
+    public DbSet<DinnerTable> DinnerTables => Set<DinnerTable>();
+    public DbSet<Receiving> Receivings => Set<Receiving>();
+    public DbSet<ReceivingItem> ReceivingItems => Set<ReceivingItem>();
+    public DbSet<ExpenseCategory> ExpenseCategories => Set<ExpenseCategory>();
+    public DbSet<Expense> Expenses => Set<Expense>();
+    public DbSet<Cashup> Cashups => Set<Cashup>();
+    public DbSet<Giftcard> Giftcards => Set<Giftcard>();
+    public DbSet<TaxCategory> TaxCategories => Set<TaxCategory>();
+    public DbSet<TaxRate> TaxRates => Set<TaxRate>();
+    public DbSet<AppConfig> AppConfigs => Set<AppConfig>();
+
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    {
+        base.OnModelCreating(modelBuilder);
+
+        // ==================== User Management Configuration ====================
+
+        // User Aggregate Root
+        modelBuilder.Entity<User>(entity =>
+        {
+            entity.HasKey(u => u.Id);
+
+            entity.ToTable("Users", schema: "user_management");
+
+            // Value Objects as owned entities
+            entity.OwnsOne(u => u.Email, email =>
+            {
+                email.Property(e => e.Value)
+                    .HasColumnName("Email")
+                    .HasMaxLength(254)
+                    .IsRequired();
+            });
+
+            entity.OwnsOne(u => u.PasswordHash, hash =>
+            {
+                hash.Property(h => h.Hash)
+                    .HasColumnName("PasswordHash")
+                    .IsRequired();
+            });
+
+            // Scalar properties
+            entity.Property(u => u.Role)
+                .HasConversion<int>()
+                .IsRequired();
+
+            entity.Property(u => u.IsActive)
+                .HasDefaultValue(true);
+
+            entity.Property(u => u.FullName)
+                .HasMaxLength(100)
+                .IsRequired();
+
+            entity.Property(u => u.PhoneNumber)
+                .HasMaxLength(20);
+
+            entity.Property(u => u.CreatedAt)
+                .HasDefaultValueSql("CURRENT_TIMESTAMP");
+
+            entity.Property(u => u.CreatedBy)
+                .HasMaxLength(254)
+                .HasDefaultValue("SYSTEM");
+
+            // Indexes for common queries
+            entity.HasIndex(u => u.Email).IsUnique();
+            entity.HasIndex(u => u.IsActive);
+            entity.HasIndex(u => u.Role);
+            entity.HasIndex(u => u.CreatedAt);
+        });
+
+        // ==================== Existing Configuration ====================
+
+        // TPT inheritance configuration for Person
+        modelBuilder.Entity<Person>().ToTable("People");
+        modelBuilder.Entity<Customer>().ToTable("Customers");
+        modelBuilder.Entity<Employee>().ToTable("Employees");
+        modelBuilder.Entity<Supplier>().ToTable("Suppliers");
+
+        // Value Objects Configuration (Address inside Person)
+        modelBuilder.Entity<Person>().OwnsOne(p => p.Address, a =>
+        {
+            a.Property(ad => ad.Street).HasColumnName("Street");
+            a.Property(ad => ad.City).HasColumnName("City");
+            a.Property(ad => ad.State).HasColumnName("State");
+            a.Property(ad => ad.Zip).HasColumnName("Zip");
+            a.Property(ad => ad.Country).HasColumnName("Country");
+        });
+
+        // Config composite keys / relationships
+        modelBuilder.Entity<ItemQuantity>()
+            .HasIndex(iq => new { iq.ItemId, iq.LocationId }).IsUnique();
+
+        modelBuilder.Entity<ItemAttributeLink>()
+            .HasIndex(al => new { al.ItemId, al.AttributeId }).IsUnique();
+
+        modelBuilder.Entity<ItemKitItem>()
+            .HasIndex(iki => new { iki.ItemKitId, iki.ItemId }).IsUnique();
+            
+        // Employee Permissions config (serialize string list as json)
+        modelBuilder.Entity<Employee>()
+            .Property(e => e.GrantedModules)
+            .HasConversion(
+                v => string.Join(',', v),
+                v => v.Split(',', StringSplitOptions.RemoveEmptyEntries).ToList()
+            );
+    }
+
+    public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
+    {
+        return await base.SaveChangesAsync(cancellationToken);
+    }
+}

@@ -1,0 +1,449 @@
+﻿using BCrypt.Net;
+using Microsoft.Extensions.Logging;
+using POS.Application.Constants;
+using POS.Application.Features.UserManagement.DTOs;
+using POS.Domain.Aggregates.UserManagement;
+using POS.Domain.Interfaces.Repositories;
+using POS.Domain.ValueObjects;
+
+namespace POS.Application.Features.UserManagement.Commands.Handlers;
+
+/// <summary>
+/// Handler for CreateUserCommand.
+/// Implements command handler pattern with single responsibility.
+/// Ensures email uniqueness, hashes password securely, persists aggregate.
+/// </summary>
+public class CreateUserCommandHandler : IRequestHandler<CreateUserCommand, Result<UserResponse>>
+{
+    private readonly IUserRepository _userRepository;
+    private readonly ILocalizationService _localizationService;
+    private readonly ILogger<CreateUserCommandHandler> _logger;
+
+    public CreateUserCommandHandler(
+        IUserRepository userRepository,
+        ILocalizationService localizationService,
+        ILogger<CreateUserCommandHandler> logger)
+    {
+        _userRepository = userRepository;
+        _localizationService = localizationService;
+        _logger = logger;
+    }
+
+    public async Task<Result<UserResponse>> Handle(
+        CreateUserCommand request,
+        CancellationToken cancellationToken)
+    {
+        try
+        {
+            var locale = request.PreferredLanguage ?? DefaultValues.DefaultLanguage;
+
+            // Check if email already exists
+            var emailExists = await _userRepository.EmailExistsAsync(
+                new Email(request.Email),
+                cancellationToken);
+
+            if (emailExists)
+            {
+                var errorMessage = _localizationService.GetString(
+                    LocalizationKeys.EmailAlreadyExists,
+                    locale: locale);
+
+                _logger.LogWarning($"Attempt to create user with existing email: {request.Email}");
+                return Result<UserResponse>.Failure(errorMessage);
+            }
+
+            // Hash password securely using BCrypt
+            var passwordHash = BCrypt.HashPassword(request.Password);
+
+            // Create user aggregate
+            var user = User.Create(
+                email: request.Email,
+                passwordHash: passwordHash,
+                role: request.Role,
+                fullName: request.FullName,
+                phoneNumber: request.PhoneNumber,
+                createdBy: "SYSTEM"); // TODO: Get current user from context
+
+            // Persist aggregate
+            await _userRepository.AddAsync(user, cancellationToken);
+            await _userRepository.UnitOfWork.SaveChangesAsync(cancellationToken);
+
+            _logger.LogInformation($"User created successfully: {user.Id}");
+
+            // Map to response DTO
+            var response = MapUserToResponse(user);
+
+            var successMessage = _localizationService.GetString(
+                LocalizationKeys.UserCreatedSuccessfully,
+                locale: locale);
+
+            return Result<UserResponse>.Success(response, successMessage);
+        }
+        catch (ArgumentException ex)
+        {
+            _logger.LogWarning($"Validation error creating user: {ex.Message}");
+            return Result<UserResponse>.Failure(ex.Message);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError($"Error creating user: {ex.Message}");
+            var errorMessage = _localizationService.GetString(
+                LocalizationKeys.DatabaseError,
+                locale: request.PreferredLanguage ?? DefaultValues.DefaultLanguage);
+            return Result<UserResponse>.Failure(errorMessage);
+        }
+    }
+
+    private static UserResponse MapUserToResponse(User user)
+    {
+        return new UserResponse
+        {
+            Id = user.Id,
+            Email = user.Email.Value,
+            FullName = user.FullName,
+            PhoneNumber = user.PhoneNumber,
+            Role = user.Role,
+            Permissions = user.Permissions.ToList(),
+            IsActive = user.IsActive,
+            CreatedAt = user.CreatedAt,
+            CreatedBy = user.CreatedBy,
+            LastModifiedAt = user.LastModifiedAt,
+            LastModifiedBy = user.LastModifiedBy,
+            LastLoginAt = user.LastLoginAt
+        };
+    }
+}
+
+/// <summary>
+/// Handler for AssignRoleCommand.
+/// Ensures user exists before modifying role.
+/// </summary>
+public class AssignRoleCommandHandler : IRequestHandler<AssignRoleCommand, Result<UserResponse>>
+{
+    private readonly IUserRepository _userRepository;
+    private readonly ILocalizationService _localizationService;
+    private readonly ILogger<AssignRoleCommandHandler> _logger;
+
+    public AssignRoleCommandHandler(
+        IUserRepository userRepository,
+        ILocalizationService localizationService,
+        ILogger<AssignRoleCommandHandler> logger)
+    {
+        _userRepository = userRepository;
+        _localizationService = localizationService;
+        _logger = logger;
+    }
+
+    public async Task<Result<UserResponse>> Handle(
+        AssignRoleCommand request,
+        CancellationToken cancellationToken)
+    {
+        try
+        {
+            var locale = request.PreferredLanguage ?? DefaultValues.DefaultLanguage;
+
+            // Find user
+            var user = await _userRepository.GetByIdAsync(request.UserId, cancellationToken);
+            if (user == null)
+            {
+                var errorMessage = _localizationService.GetString(
+                    LocalizationKeys.UserNotFound,
+                    locale: locale);
+
+                _logger.LogWarning($"User not found: {request.UserId}");
+                return Result<UserResponse>.Failure(errorMessage);
+            }
+
+            // Assign role (domain logic handles event publishing)
+            user.ChangeRole(request.NewRole, "SYSTEM"); // TODO: Get current user
+
+            // Persist changes
+            _userRepository.Update(user);
+            await _userRepository.UnitOfWork.SaveChangesAsync(cancellationToken);
+
+            _logger.LogInformation($"Role assigned to user {user.Id}: {request.NewRole}");
+
+            var response = MapUserToResponse(user);
+            var successMessage = _localizationService.GetString(
+                LocalizationKeys.RoleAssignedSuccessfully,
+                locale: locale);
+
+            return Result<UserResponse>.Success(response, successMessage);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError($"Error assigning role: {ex.Message}");
+            var errorMessage = _localizationService.GetString(
+                LocalizationKeys.OperationFailed,
+                locale: request.PreferredLanguage ?? DefaultValues.DefaultLanguage);
+            return Result<UserResponse>.Failure(errorMessage);
+        }
+    }
+
+    private static UserResponse MapUserToResponse(User user)
+    {
+        return new UserResponse
+        {
+            Id = user.Id,
+            Email = user.Email.Value,
+            FullName = user.FullName,
+            PhoneNumber = user.PhoneNumber,
+            Role = user.Role,
+            Permissions = user.Permissions.ToList(),
+            IsActive = user.IsActive,
+            CreatedAt = user.CreatedAt,
+            CreatedBy = user.CreatedBy,
+            LastModifiedAt = user.LastModifiedAt,
+            LastModifiedBy = user.LastModifiedBy,
+            LastLoginAt = user.LastLoginAt
+        };
+    }
+}
+
+/// <summary>
+/// Handler for GrantPermissionCommand.
+/// </summary>
+public class GrantPermissionCommandHandler : IRequestHandler<GrantPermissionCommand, Result<UserResponse>>
+{
+    private readonly IUserRepository _userRepository;
+    private readonly ILocalizationService _localizationService;
+    private readonly ILogger<GrantPermissionCommandHandler> _logger;
+
+    public GrantPermissionCommandHandler(
+        IUserRepository userRepository,
+        ILocalizationService localizationService,
+        ILogger<GrantPermissionCommandHandler> logger)
+    {
+        _userRepository = userRepository;
+        _localizationService = localizationService;
+        _logger = logger;
+    }
+
+    public async Task<Result<UserResponse>> Handle(
+        GrantPermissionCommand request,
+        CancellationToken cancellationToken)
+    {
+        try
+        {
+            var locale = request.PreferredLanguage ?? DefaultValues.DefaultLanguage;
+
+            var user = await _userRepository.GetByIdAsync(request.UserId, cancellationToken);
+            if (user == null)
+            {
+                var errorMessage = _localizationService.GetString(
+                    LocalizationKeys.UserNotFound,
+                    locale: locale);
+
+                return Result<UserResponse>.Failure(errorMessage);
+            }
+
+            user.GrantPermission(request.Permission, "SYSTEM"); // TODO: Get current user
+
+            _userRepository.Update(user);
+            await _userRepository.UnitOfWork.SaveChangesAsync(cancellationToken);
+
+            _logger.LogInformation($"Permission granted to user {user.Id}: {request.Permission}");
+
+            var response = MapUserToResponse(user);
+            var successMessage = _localizationService.GetString(
+                LocalizationKeys.PermissionGrantedSuccessfully,
+                locale: locale);
+
+            return Result<UserResponse>.Success(response, successMessage);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError($"Error granting permission: {ex.Message}");
+            var errorMessage = _localizationService.GetString(
+                LocalizationKeys.OperationFailed,
+                locale: request.PreferredLanguage ?? DefaultValues.DefaultLanguage);
+            return Result<UserResponse>.Failure(errorMessage);
+        }
+    }
+
+    private static UserResponse MapUserToResponse(User user)
+    {
+        return new UserResponse
+        {
+            Id = user.Id,
+            Email = user.Email.Value,
+            FullName = user.FullName,
+            PhoneNumber = user.PhoneNumber,
+            Role = user.Role,
+            Permissions = user.Permissions.ToList(),
+            IsActive = user.IsActive,
+            CreatedAt = user.CreatedAt,
+            CreatedBy = user.CreatedBy,
+            LastModifiedAt = user.LastModifiedAt,
+            LastModifiedBy = user.LastModifiedBy,
+            LastLoginAt = user.LastLoginAt
+        };
+    }
+}
+
+/// <summary>
+/// Handler for DeactivateUserCommand.
+/// </summary>
+public class DeactivateUserCommandHandler : IRequestHandler<DeactivateUserCommand, Result<UserResponse>>
+{
+    private readonly IUserRepository _userRepository;
+    private readonly ILocalizationService _localizationService;
+    private readonly ILogger<DeactivateUserCommandHandler> _logger;
+
+    public DeactivateUserCommandHandler(
+        IUserRepository userRepository,
+        ILocalizationService localizationService,
+        ILogger<DeactivateUserCommandHandler> logger)
+    {
+        _userRepository = userRepository;
+        _localizationService = localizationService;
+        _logger = logger;
+    }
+
+    public async Task<Result<UserResponse>> Handle(
+        DeactivateUserCommand request,
+        CancellationToken cancellationToken)
+    {
+        try
+        {
+            var locale = request.PreferredLanguage ?? DefaultValues.DefaultLanguage;
+
+            var user = await _userRepository.GetByIdAsync(request.UserId, cancellationToken);
+            if (user == null)
+            {
+                var errorMessage = _localizationService.GetString(
+                    LocalizationKeys.UserNotFound,
+                    locale: locale);
+
+                return Result<UserResponse>.Failure(errorMessage);
+            }
+
+            user.Deactivate("SYSTEM"); // TODO: Get current user
+
+            _userRepository.Update(user);
+            await _userRepository.UnitOfWork.SaveChangesAsync(cancellationToken);
+
+            _logger.LogInformation($"User deactivated: {user.Id}");
+
+            var response = MapUserToResponse(user);
+            var successMessage = _localizationService.GetString(
+                LocalizationKeys.UserDeactivatedSuccessfully,
+                locale: locale);
+
+            return Result<UserResponse>.Success(response, successMessage);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError($"Error deactivating user: {ex.Message}");
+            var errorMessage = _localizationService.GetString(
+                LocalizationKeys.OperationFailed,
+                locale: request.PreferredLanguage ?? DefaultValues.DefaultLanguage);
+            return Result<UserResponse>.Failure(errorMessage);
+        }
+    }
+
+    private static UserResponse MapUserToResponse(User user)
+    {
+        return new UserResponse
+        {
+            Id = user.Id,
+            Email = user.Email.Value,
+            FullName = user.FullName,
+            PhoneNumber = user.PhoneNumber,
+            Role = user.Role,
+            Permissions = user.Permissions.ToList(),
+            IsActive = user.IsActive,
+            CreatedAt = user.CreatedAt,
+            CreatedBy = user.CreatedBy,
+            LastModifiedAt = user.LastModifiedAt,
+            LastModifiedBy = user.LastModifiedBy,
+            LastLoginAt = user.LastLoginAt
+        };
+    }
+}
+
+/// <summary>
+/// Handler for UpdateUserProfileCommand.
+/// </summary>
+public class UpdateUserProfileCommandHandler : IRequestHandler<UpdateUserProfileCommand, Result<UserResponse>>
+{
+    private readonly IUserRepository _userRepository;
+    private readonly ILocalizationService _localizationService;
+    private readonly ILogger<UpdateUserProfileCommandHandler> _logger;
+
+    public UpdateUserProfileCommandHandler(
+        IUserRepository userRepository,
+        ILocalizationService localizationService,
+        ILogger<UpdateUserProfileCommandHandler> logger)
+    {
+        _userRepository = userRepository;
+        _localizationService = localizationService;
+        _logger = logger;
+    }
+
+    public async Task<Result<UserResponse>> Handle(
+        UpdateUserProfileCommand request,
+        CancellationToken cancellationToken)
+    {
+        try
+        {
+            var locale = request.PreferredLanguage ?? DefaultValues.DefaultLanguage;
+
+            var user = await _userRepository.GetByIdAsync(request.UserId, cancellationToken);
+            if (user == null)
+            {
+                var errorMessage = _localizationService.GetString(
+                    LocalizationKeys.UserNotFound,
+                    locale: locale);
+
+                return Result<UserResponse>.Failure(errorMessage);
+            }
+
+            user.UpdateProfile(request.FullName, request.PhoneNumber, "SYSTEM"); // TODO: Get current user
+
+            _userRepository.Update(user);
+            await _userRepository.UnitOfWork.SaveChangesAsync(cancellationToken);
+
+            _logger.LogInformation($"User profile updated: {user.Id}");
+
+            var response = MapUserToResponse(user);
+            var successMessage = _localizationService.GetString(
+                LocalizationKeys.UserUpdatedSuccessfully,
+                locale: locale);
+
+            return Result<UserResponse>.Success(response, successMessage);
+        }
+        catch (ArgumentException ex)
+        {
+            _logger.LogWarning($"Validation error updating profile: {ex.Message}");
+            return Result<UserResponse>.Failure(ex.Message);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError($"Error updating profile: {ex.Message}");
+            var errorMessage = _localizationService.GetString(
+                LocalizationKeys.OperationFailed,
+                locale: request.PreferredLanguage ?? DefaultValues.DefaultLanguage);
+            return Result<UserResponse>.Failure(errorMessage);
+        }
+    }
+
+    private static UserResponse MapUserToResponse(User user)
+    {
+        return new UserResponse
+        {
+            Id = user.Id,
+            Email = user.Email.Value,
+            FullName = user.FullName,
+            PhoneNumber = user.PhoneNumber,
+            Role = user.Role,
+            Permissions = user.Permissions.ToList(),
+            IsActive = user.IsActive,
+            CreatedAt = user.CreatedAt,
+            CreatedBy = user.CreatedBy,
+            LastModifiedAt = user.LastModifiedAt,
+            LastModifiedBy = user.LastModifiedBy,
+            LastLoginAt = user.LastLoginAt
+        };
+    }
+}

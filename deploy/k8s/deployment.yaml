@@ -1,0 +1,79 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: netpos-api
+  namespace: netpos
+  labels:
+    app: netpos-api
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: netpos-api
+  template:
+    metadata:
+      labels:
+        app: netpos-api
+    spec:
+      containers:
+        - name: netpos-api
+          image: netpos/api:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8080
+          env:
+            - name: ASPNETCORE_ENVIRONMENT
+              value: "Production"
+            - name: ConnectionStrings__DefaultConnection
+              valueFrom:
+                secretKeyRef:
+                  name: netpos-secrets
+                  key: db-connection-string
+            - name: AI__Provider
+              valueFrom:
+                configMapKeyRef:
+                  name: netpos-config
+                  key: ai-provider
+            - name: AI__Endpoint
+              valueFrom:
+                configMapKeyRef:
+                  name: netpos-config
+                  key: ai-endpoint
+            - name: AI__ModelId
+              valueFrom:
+                configMapKeyRef:
+                  name: netpos-config
+                  key: ai-model-id
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: 8080
+            initialDelaySeconds: 15
+            periodSeconds: 20
+          readinessProbe:
+            httpGet:
+              path: /readyz
+              port: 8080
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "256Mi"
+            limits:
+              cpu: "500m"
+              memory: "512Mi"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: netpos-api-service
+  namespace: netpos
+spec:
+  selector:
+    app: netpos-api
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 8080
+  type: ClusterIP

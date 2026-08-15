@@ -1,0 +1,286 @@
+﻿using POS.Domain.Aggregates.UserManagement.Events;
+using POS.Domain.Common;
+using POS.Domain.Enums;
+using POS.Domain.ValueObjects;
+
+namespace POS.Domain.Aggregates.UserManagement;
+
+/// <summary>
+/// User aggregate root in User Management domain.
+/// Encapsulates all business logic related to users, roles, and permissions.
+/// Publishes domain events for audit trail and AI agent reasoning.
+/// </summary>
+public class User : AggregateRoot
+{
+    private readonly List<DomainEvent> _domainEvents = new();
+
+    // Identity
+    public Guid Id { get; private set; }
+
+    // Core Properties
+    public Email Email { get; private set; } = null!;
+    public PasswordHash PasswordHash { get; private set; } = null!;
+
+    // Role & Permissions
+    public UserRole Role { get; private set; }
+    private readonly HashSet<PermissionType> _permissions = new();
+    public IReadOnlyCollection<PermissionType> Permissions => _permissions.AsReadOnly();
+
+    // Metadata
+    public bool IsActive { get; private set; }
+    public string FullName { get; private set; } = string.Empty;
+    public string? PhoneNumber { get; private set; }
+
+    // Audit Trail
+    public DateTime CreatedAt { get; private set; }
+    public string CreatedBy { get; private set; } = "SYSTEM";
+    public DateTime? LastModifiedAt { get; private set; }
+    public string? LastModifiedBy { get; private set; }
+    public DateTime? LastLoginAt { get; private set; }
+
+    // Constructor (private for DDD - use factory methods)
+    private User() { }
+
+    // ====================== Factory Methods ======================
+
+    /// <summary>
+    /// Creates a new user with the specified details.
+    /// Publishes UserCreatedDomainEvent for audit trail.
+    /// </summary>
+    public static User Create(
+        string email,
+        string passwordHash,
+        UserRole role,
+        string fullName,
+        string? phoneNumber = null,
+        string createdBy = "SYSTEM")
+    {
+        if (string.IsNullOrWhiteSpace(email))
+            throw new ArgumentException("Email is required", nameof(email));
+
+        if (string.IsNullOrWhiteSpace(passwordHash))
+            throw new ArgumentException("Password hash is required", nameof(passwordHash));
+
+        if (string.IsNullOrWhiteSpace(fullName))
+            throw new ArgumentException("Full name is required", nameof(fullName));
+
+        var user = new User
+        {
+            Id = Guid.NewGuid(),
+            Email = new Email(email),
+            PasswordHash = new PasswordHash(passwordHash),
+            Role = role,
+            FullName = fullName,
+            PhoneNumber = phoneNumber,
+            IsActive = true,
+            CreatedAt = DateTime.UtcNow,
+            CreatedBy = createdBy
+        };
+
+        // Assign default permissions based on role
+        user.AssignDefaultPermissionsForRole(role);
+
+        // Publish domain event
+        user._domainEvents.Add(new UserCreatedDomainEvent
+        {
+            UserId = user.Id,
+            Email = user.Email.Value,
+            Role = user.Role,
+            CreatedAt = user.CreatedAt,
+            CreatedBy = user.CreatedBy
+        });
+
+        return user;
+    }
+
+    // ====================== Behaviors ======================
+
+    /// <summary>
+    /// Changes the user's role and updates permissions accordingly.
+    /// Publishes UserRoleChangedDomainEvent.
+    /// </summary>
+    public void ChangeRole(UserRole newRole, string changedBy = "SYSTEM")
+    {
+        if (Role == newRole)
+            return; // No change needed
+
+        var oldRole = Role;
+        Role = newRole;
+        LastModifiedAt = DateTime.UtcNow;
+        LastModifiedBy = changedBy;
+
+        // Update permissions for new role
+        _permissions.Clear();
+        AssignDefaultPermissionsForRole(newRole);
+
+        _domainEvents.Add(new UserRoleChangedDomainEvent
+        {
+            UserId = Id,
+            OldRole = oldRole,
+            NewRole = newRole,
+            ChangedAt = DateTime.UtcNow,
+            ChangedBy = changedBy
+        });
+    }
+
+    /// <summary>
+    /// Grants a specific permission to the user.
+    /// Publishes UserPermissionGrantedDomainEvent.
+    /// </summary>
+    public void GrantPermission(PermissionType permission, string grantedBy = "SYSTEM")
+    {
+        if (_permissions.Contains(permission))
+            return; // Already has this permission
+
+        _permissions.Add(permission);
+        LastModifiedAt = DateTime.UtcNow;
+        LastModifiedBy = grantedBy;
+
+        _domainEvents.Add(new UserPermissionGrantedDomainEvent
+        {
+            UserId = Id,
+            Permission = permission,
+            GrantedAt = DateTime.UtcNow,
+            GrantedBy = grantedBy
+        });
+    }
+
+    /// <summary>
+    /// Revokes a specific permission from the user.
+    /// </summary>
+    public void RevokePermission(PermissionType permission, string revokedBy = "SYSTEM")
+    {
+        if (!_permissions.Contains(permission))
+            return; // Doesn't have this permission
+
+        _permissions.Remove(permission);
+        LastModifiedAt = DateTime.UtcNow;
+        LastModifiedBy = revokedBy;
+    }
+
+    /// <summary>
+    /// Checks if the user has a specific permission.
+    /// </summary>
+    public bool HasPermission(PermissionType permission) => _permissions.Contains(permission);
+
+    /// <summary>
+    /// Deactivates the user account.
+    /// Publishes UserDeactivatedDomainEvent.
+    /// </summary>
+    public void Deactivate(string deactivatedBy = "SYSTEM")
+    {
+        if (!IsActive)
+            return; // Already inactive
+
+        IsActive = false;
+        LastModifiedAt = DateTime.UtcNow;
+        LastModifiedBy = deactivatedBy;
+
+        _domainEvents.Add(new UserDeactivatedDomainEvent
+        {
+            UserId = Id,
+            DeactivatedAt = DateTime.UtcNow,
+            DeactivatedBy = deactivatedBy
+        });
+    }
+
+    /// <summary>
+    /// Reactivates the user account.
+    /// </summary>
+    public void Activate(string activatedBy = "SYSTEM")
+    {
+        if (IsActive)
+            return; // Already active
+
+        IsActive = true;
+        LastModifiedAt = DateTime.UtcNow;
+        LastModifiedBy = activatedBy;
+    }
+
+    /// <summary>
+    /// Records the user's last login time.
+    /// </summary>
+    public void RecordLoginAttempt()
+    {
+        LastLoginAt = DateTime.UtcNow;
+    }
+
+    /// <summary>
+    /// Updates the user's profile information.
+    /// </summary>
+    public void UpdateProfile(string fullName, string? phoneNumber, string modifiedBy = "SYSTEM")
+    {
+        if (string.IsNullOrWhiteSpace(fullName))
+            throw new ArgumentException("Full name is required", nameof(fullName));
+
+        FullName = fullName;
+        PhoneNumber = phoneNumber;
+        LastModifiedAt = DateTime.UtcNow;
+        LastModifiedBy = modifiedBy;
+    }
+
+    // ====================== Private Helpers ======================
+
+    private void AssignDefaultPermissionsForRole(UserRole role)
+    {
+        // Clear existing permissions
+        _permissions.Clear();
+
+        // Assign permissions based on role (following least privilege principle)
+        switch (role)
+        {
+            case UserRole.Administrator:
+                // Admin gets all permissions
+                foreach (PermissionType permission in Enum.GetValues(typeof(PermissionType)))
+                {
+                    _permissions.Add(permission);
+                }
+                break;
+
+            case UserRole.Manager:
+                // Manager can view and manage most things except user admin
+                _permissions.Add(PermissionType.ProcessSales);
+                _permissions.Add(PermissionType.ProcessRefunds);
+                _permissions.Add(PermissionType.ProcessPayments);
+                _permissions.Add(PermissionType.ViewSalesReport);
+                _permissions.Add(PermissionType.ManageInventory);
+                _permissions.Add(PermissionType.ViewInventory);
+                _permissions.Add(PermissionType.ReceiveStock);
+                _permissions.Add(PermissionType.ViewReports);
+                _permissions.Add(PermissionType.ManageConfiguration);
+                break;
+
+            case UserRole.Cashier:
+                // Cashier can process sales and payments
+                _permissions.Add(PermissionType.ProcessSales);
+                _permissions.Add(PermissionType.ProcessPayments);
+                _permissions.Add(PermissionType.ViewInventory);
+                break;
+
+            case UserRole.WarehouseStaff:
+                // Warehouse can manage inventory
+                _permissions.Add(PermissionType.ManageInventory);
+                _permissions.Add(PermissionType.ViewInventory);
+                _permissions.Add(PermissionType.ReceiveStock);
+                _permissions.Add(PermissionType.AdjustStock);
+                break;
+
+            case UserRole.Supervisor:
+                // Supervisor has elevated permissions
+                _permissions.Add(PermissionType.ProcessSales);
+                _permissions.Add(PermissionType.ProcessRefunds);
+                _permissions.Add(PermissionType.ProcessPayments);
+                _permissions.Add(PermissionType.ViewSalesReport);
+                _permissions.Add(PermissionType.ManageInventory);
+                _permissions.Add(PermissionType.ViewInventory);
+                _permissions.Add(PermissionType.ViewReports);
+                break;
+        }
+    }
+
+    // ====================== Domain Events ======================
+
+    public IReadOnlyCollection<INotification> GetDomainEvents() => _domainEvents.AsReadOnly();
+
+    public void ClearDomainEvents() => _domainEvents.Clear();
+}

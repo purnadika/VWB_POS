@@ -1,0 +1,77 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Runtime.CompilerServices;
+using System.Threading;
+using System.Threading.Tasks;
+using Microsoft.Extensions.AI;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+
+namespace POS.Infrastructure.AI;
+
+public static class AiClientRegistration
+{
+    public static IServiceCollection AddPOSAiClient(this IServiceCollection services, IConfiguration configuration)
+    {
+        var provider = configuration["AI:Provider"] ?? "Ollama";
+        var endpoint = configuration["AI:Endpoint"] ?? "http://localhost:11434";
+        var modelId = configuration["AI:ModelId"] ?? "llama3";
+
+        if (provider.Equals("Ollama", StringComparison.OrdinalIgnoreCase))
+        {
+            services.AddSingleton<IChatClient>(sp =>
+                new OllamaChatClient(new Uri(endpoint), modelId));
+        }
+        else
+        {
+            services.AddSingleton<IChatClient, MockChatClient>();
+        }
+
+        return services;
+    }
+}
+
+/// <summary>
+/// Fallback mock IChatClient used when no AI backend is configured.
+/// Returns deterministic demo responses so the app boots and runs without Ollama.
+/// </summary>
+public sealed class MockChatClient : IChatClient
+{
+    public ChatClientMetadata Metadata { get; } = new("MockChatClient");
+
+    public async Task<ChatCompletion> CompleteAsync(
+        IList<ChatMessage> chatMessages,
+        ChatOptions? options = null,
+        CancellationToken cancellationToken = default)
+    {
+        await Task.Yield(); // satisfy async constraint
+        var prompt = chatMessages.LastOrDefault()?.Text ?? "";
+        var text = options?.Tools?.Any() == true
+            ? "Mock AI tool-calling result: tools executed successfully."
+            : $"[Mock] Response to: '{prompt}'. Configure Ollama or OpenAI for live AI.";
+
+        return new ChatCompletion(new ChatMessage(ChatRole.Assistant, text));
+    }
+
+    public async IAsyncEnumerable<StreamingChatCompletionUpdate> CompleteStreamingAsync(
+        IList<ChatMessage> chatMessages,
+        ChatOptions? options = null,
+        [EnumeratorCancellation] CancellationToken cancellationToken = default)
+    {
+        await Task.Yield();
+        yield return new StreamingChatCompletionUpdate
+        {
+            Role = ChatRole.Assistant,
+            Text = "[Mock streaming response]"
+        };
+    }
+
+    public TService? GetService<TService>(object? key = null) where TService : class
+        => this as TService;
+
+    public object? GetService(Type serviceType, object? key = null)
+        => serviceType.IsInstanceOfType(this) ? this : null;
+
+    public void Dispose() { }
+}

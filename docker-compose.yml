@@ -1,0 +1,47 @@
+﻿version: '3.8'
+
+services:
+  pos-db:
+    image: postgres:15-alpine
+    container_name: pos-db
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: pos_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - pos_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d pos_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  pos-backend:
+    build:
+      context: .
+      dockerfile: Dockerfile.Backend
+    container_name: pos-backend
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ConnectionStrings__DefaultConnection=Host=pos-db;Database=pos_db;Username=postgres;Password=password
+      - JwtSettings__Secret=SuperSecretKeyForDevelopmentOnlyPleaseChangeInProduction
+    ports:
+      - "8080:8080"
+    depends_on:
+      pos-db:
+        condition: service_healthy
+
+  pos-frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile.Frontend
+    container_name: pos-frontend
+    ports:
+      - "80:80"
+    depends_on:
+      - pos-backend
+
+volumes:
+  pos_data:

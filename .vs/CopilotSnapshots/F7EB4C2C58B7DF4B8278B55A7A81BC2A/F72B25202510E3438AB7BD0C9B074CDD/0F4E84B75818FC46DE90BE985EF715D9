@@ -1,0 +1,343 @@
+﻿using MediatR;
+using Microsoft.Extensions.Logging;
+using POS.Application.Constants;
+using POS.Application.Features.UserManagement.DTOs;
+using POS.Application.Services;
+using POS.Domain.Aggregates.UserManagement;
+using POS.Domain.Common;
+using POS.Domain.Enums;
+using POS.Domain.Interfaces.Repositories;
+using POS.Domain.ValueObjects;
+
+namespace POS.Application.Features.UserManagement.Queries.Handlers;
+
+/// <summary>
+/// Handler for GetUserQuery.
+/// Retrieves single user by ID with proper error handling.
+/// </summary>
+public class GetUserQueryHandler : IRequestHandler<GetUserQuery, Result<UserResponse>>
+{
+    private readonly IUserRepository _userRepository;
+    private readonly ILocalizationService _localizationService;
+    private readonly ILogger<GetUserQueryHandler> _logger;
+
+    public GetUserQueryHandler(
+        IUserRepository userRepository,
+        ILocalizationService localizationService,
+        ILogger<GetUserQueryHandler> logger)
+    {
+        _userRepository = userRepository;
+        _localizationService = localizationService;
+        _logger = logger;
+    }
+
+    public async Task<Result<UserResponse>> Handle(
+        GetUserQuery request,
+        CancellationToken cancellationToken)
+    {
+        try
+        {
+            var locale = request.PreferredLanguage ?? DefaultValues.DefaultLanguage;
+
+            var user = await _userRepository.GetByIdAsync(request.UserId, cancellationToken);
+            if (user == null)
+            {
+                var errorMessage = _localizationService.GetString(
+                    LocalizationKeys.UserNotFound,
+                    locale: locale);
+
+                _logger.LogInformation($"User not found: {request.UserId}");
+                return Result<UserResponse>.Failure(errorMessage);
+            }
+
+            var response = MapUserToResponse(user);
+            return Result<UserResponse>.Success(response);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError($"Error retrieving user: {ex.Message}");
+            var errorMessage = _localizationService.GetString(
+                LocalizationKeys.DatabaseError,
+                locale: request.PreferredLanguage ?? DefaultValues.DefaultLanguage);
+            return Result<UserResponse>.Failure(errorMessage);
+        }
+    }
+
+    private static UserResponse MapUserToResponse(User user)
+    {
+        return new UserResponse
+        {
+            Id = user.Id,
+            Email = user.Email.Value,
+            FullName = user.FullName,
+            PhoneNumber = user.PhoneNumber,
+            Role = user.Role,
+            Permissions = user.Permissions.ToList(),
+            IsActive = user.IsActive,
+            CreatedAt = user.CreatedAt,
+            CreatedBy = user.CreatedBy,
+            LastModifiedAt = user.LastModifiedAt,
+            LastModifiedBy = user.LastModifiedBy,
+            LastLoginAt = user.LastLoginAt
+        };
+    }
+}
+
+/// <summary>
+/// Handler for GetUserByEmailQuery.
+/// </summary>
+public class GetUserByEmailQueryHandler : IRequestHandler<GetUserByEmailQuery, Result<UserResponse>>
+{
+    private readonly IUserRepository _userRepository;
+    private readonly ILocalizationService _localizationService;
+    private readonly ILogger<GetUserByEmailQueryHandler> _logger;
+
+    public GetUserByEmailQueryHandler(
+        IUserRepository userRepository,
+        ILocalizationService localizationService,
+        ILogger<GetUserByEmailQueryHandler> logger)
+    {
+        _userRepository = userRepository;
+        _localizationService = localizationService;
+        _logger = logger;
+    }
+
+    public async Task<Result<UserResponse>> Handle(
+        GetUserByEmailQuery request,
+        CancellationToken cancellationToken)
+    {
+        try
+        {
+            var locale = request.PreferredLanguage ?? DefaultValues.DefaultLanguage;
+
+            var user = await _userRepository.FindByEmailAsync(request.Email, cancellationToken);
+            if (user == null)
+            {
+                var errorMessage = _localizationService.GetString(
+                    LocalizationKeys.UserNotFound,
+                    locale: locale);
+
+                return Result<UserResponse>.Failure(errorMessage);
+            }
+
+            var response = MapUserToResponse(user);
+            return Result<UserResponse>.Success(response);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError($"Error retrieving user by email: {ex.Message}");
+            var errorMessage = _localizationService.GetString(
+                LocalizationKeys.DatabaseError,
+                locale: request.PreferredLanguage ?? DefaultValues.DefaultLanguage);
+            return Result<UserResponse>.Failure(errorMessage);
+        }
+    }
+
+    private static UserResponse MapUserToResponse(User user)
+    {
+        return new UserResponse
+        {
+            Id = user.Id,
+            Email = user.Email.Value,
+            FullName = user.FullName,
+            PhoneNumber = user.PhoneNumber,
+            Role = user.Role,
+            Permissions = user.Permissions.ToList(),
+            IsActive = user.IsActive,
+            CreatedAt = user.CreatedAt,
+            CreatedBy = user.CreatedBy,
+            LastModifiedAt = user.LastModifiedAt,
+            LastModifiedBy = user.LastModifiedBy,
+            LastLoginAt = user.LastLoginAt
+        };
+    }
+}
+
+/// <summary>
+/// Handler for ListActiveUsersQuery.
+/// Returns paginated list of active users.
+/// </summary>
+public class ListActiveUsersQueryHandler : IRequestHandler<ListActiveUsersQuery, Result<PagedResult<UserResponse>>>
+{
+    private readonly IUserRepository _userRepository;
+    private readonly ILogger<ListActiveUsersQueryHandler> _logger;
+
+    public ListActiveUsersQueryHandler(
+        IUserRepository userRepository,
+        ILogger<ListActiveUsersQueryHandler> logger)
+    {
+        _userRepository = userRepository;
+        _logger = logger;
+    }
+
+    public async Task<Result<PagedResult<UserResponse>>> Handle(
+        ListActiveUsersQuery request,
+        CancellationToken cancellationToken)
+    {
+        try
+        {
+            // Validate pagination parameters
+            var pageNumber = Math.Max(1, request.PageNumber);
+            var pageSize = Math.Min(Math.Max(1, request.PageSize), DefaultValues.MaxPageSize);
+
+            var allUsers = await _userRepository.GetActiveUsersAsync(cancellationToken);
+            var totalCount = allUsers.Count();
+
+            var items = allUsers
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
+                .Select(MapUserToResponse)
+                .ToList();
+
+            var result = new PagedResult<UserResponse>
+            {
+                Items = items,
+                PageNumber = pageNumber,
+                PageSize = pageSize,
+                TotalCount = totalCount
+            };
+
+            return Result<PagedResult<UserResponse>>.Success(result);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError($"Error listing active users: {ex.Message}");
+            var errorMessage = new LocalizationService(
+                Microsoft.Extensions.Logging.LoggerFactory.Create(builder => { }).CreateLogger<LocalizationService>()
+            ).GetString(LocalizationKeys.DatabaseError);
+            return Result<PagedResult<UserResponse>>.Failure(errorMessage);
+        }
+    }
+
+    private static UserResponse MapUserToResponse(User user)
+    {
+        return new UserResponse
+        {
+            Id = user.Id,
+            Email = user.Email.Value,
+            FullName = user.FullName,
+            PhoneNumber = user.PhoneNumber,
+            Role = user.Role,
+            Permissions = user.Permissions.ToList(),
+            IsActive = user.IsActive,
+            CreatedAt = user.CreatedAt,
+            CreatedBy = user.CreatedBy,
+            LastModifiedAt = user.LastModifiedAt,
+            LastModifiedBy = user.LastModifiedBy,
+            LastLoginAt = user.LastLoginAt
+        };
+    }
+}
+
+/// <summary>
+/// Handler for ListInactiveUsersQuery.
+/// </summary>
+public class ListInactiveUsersQueryHandler : IRequestHandler<ListInactiveUsersQuery, Result<PagedResult<UserResponse>>>
+{
+    private readonly IUserRepository _userRepository;
+    private readonly ILogger<ListInactiveUsersQueryHandler> _logger;
+
+    public ListInactiveUsersQueryHandler(
+        IUserRepository userRepository,
+        ILogger<ListInactiveUsersQueryHandler> logger)
+    {
+        _userRepository = userRepository;
+        _logger = logger;
+    }
+
+    public async Task<Result<PagedResult<UserResponse>>> Handle(
+        ListInactiveUsersQuery request,
+        CancellationToken cancellationToken)
+    {
+        try
+        {
+            var pageNumber = Math.Max(1, request.PageNumber);
+            var pageSize = Math.Min(Math.Max(1, request.PageSize), DefaultValues.MaxPageSize);
+
+            var allUsers = await _userRepository.GetInactiveUsersAsync(cancellationToken);
+            var totalCount = allUsers.Count();
+
+            var items = allUsers
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
+                .Select(MapUserToResponse)
+                .ToList();
+
+            var result = new PagedResult<UserResponse>
+            {
+                Items = items,
+                PageNumber = pageNumber,
+                PageSize = pageSize,
+                TotalCount = totalCount
+            };
+
+            return Result<PagedResult<UserResponse>>.Success(result);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError($"Error listing inactive users: {ex.Message}");
+            return Result<PagedResult<UserResponse>>.Failure("Database error occurred");
+        }
+    }
+
+    private static UserResponse MapUserToResponse(User user)
+    {
+        return new UserResponse
+        {
+            Id = user.Id,
+            Email = user.Email.Value,
+            FullName = user.FullName,
+            PhoneNumber = user.PhoneNumber,
+            Role = user.Role,
+            Permissions = user.Permissions.ToList(),
+            IsActive = user.IsActive,
+            CreatedAt = user.CreatedAt,
+            CreatedBy = user.CreatedBy,
+            LastModifiedAt = user.LastModifiedAt,
+            LastModifiedBy = user.LastModifiedBy,
+            LastLoginAt = user.LastLoginAt
+        };
+    }
+}
+
+/// <summary>
+/// Handler for CheckUserPermissionQuery.
+/// </summary>
+public class CheckUserPermissionQueryHandler : IRequestHandler<CheckUserPermissionQuery, Result<bool>>
+{
+    private readonly IUserRepository _userRepository;
+    private readonly ILocalizationService _localizationService;
+    private readonly ILogger<CheckUserPermissionQueryHandler> _logger;
+
+    public CheckUserPermissionQueryHandler(
+        IUserRepository userRepository,
+        ILocalizationService localizationService,
+        ILogger<CheckUserPermissionQueryHandler> logger)
+    {
+        _userRepository = userRepository;
+        _localizationService = localizationService;
+        _logger = logger;
+    }
+
+    public async Task<Result<bool>> Handle(
+        CheckUserPermissionQuery request,
+        CancellationToken cancellationToken)
+    {
+        try
+        {
+            var user = await _userRepository.GetByIdAsync(request.UserId, cancellationToken);
+            if (user == null)
+            {
+                return Result<bool>.Success(false);
+            }
+
+            var hasPermission = user.HasPermission(request.Permission);
+            return Result<bool>.Success(hasPermission);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError($"Error checking permission: {ex.Message}");
+            return Result<bool>.Failure("Error checking permission");
+        }
+    }
+}

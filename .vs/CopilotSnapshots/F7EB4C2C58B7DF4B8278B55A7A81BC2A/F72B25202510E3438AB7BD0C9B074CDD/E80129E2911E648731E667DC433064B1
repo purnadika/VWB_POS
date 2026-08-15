@@ -1,0 +1,61 @@
+﻿using MediatR;
+using POS.Application.Features.UserManagement.DTOs;
+using POS.Domain.Enums;
+
+namespace POS.Application.Features.UserManagement.Queries;
+
+/// <summary>
+/// CQRS Query to get a user by ID.
+/// </summary>
+public class GetUserQuery : IRequest<Result<UserResponse>>
+{
+    public Guid UserId { get; set; }
+    public string? PreferredLanguage { get; set; }
+}
+
+/// <summary>
+/// CQRS Query to get a user by email.
+/// </summary>
+public class GetUserByEmailQuery : IRequest<Result<UserResponse>>
+{
+    public string Email { get; set; } = string.Empty;
+    public string? PreferredLanguage { get; set; }
+}
+
+/// <summary>
+/// CQRS Query to list all active users with pagination.
+/// </summary>
+public class ListActiveUsersQuery : IRequest<Result<PagedResult<UserResponse>>>
+{
+    public int PageNumber { get; set; } = 1;
+    public int PageSize { get; set; } = 20;
+    public string? PreferredLanguage { get; set; }
+}
+
+/// <summary>
+/// CQRS Query to list all inactive users with pagination.
+/// </summary>
+public class ListInactiveUsersQuery : IRequest<Result<PagedResult<UserResponse>>>
+{
+    public int PageNumber { get; set; } = 1;
+    public int PageSize { get; set; } = 20;
+    public string? PreferredLanguage { get; set; }
+}
+
+/// <summary>
+/// CQRS Query to get all users with a specific role.
+/// </summary>
+public class GetUsersByRoleQuery : IRequest<Result<IEnumerable<UserResponse>>>
+{
+    public UserRole Role { get; set; }
+    public string? PreferredLanguage { get; set; }
+}
+
+/// <summary>
+/// CQRS Query to check if a user has a specific permission.
+/// </summary>
+public class CheckUserPermissionQuery : IRequest<Result<bool>>
+{
+    public Guid UserId { get; set; }
+    public PermissionType Permission { get; set; }
+}

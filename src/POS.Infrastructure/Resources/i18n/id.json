@@ -1,0 +1,135 @@
+{
+  "user": {
+    "created": {
+      "successfully": "Pengguna berhasil dibuat"
+    },
+    "updated": {
+      "successfully": "Pengguna berhasil diperbarui"
+    },
+    "deactivated": {
+      "successfully": "Pengguna berhasil dinonaktifkan"
+    },
+    "activated": {
+      "successfully": "Pengguna berhasil diaktifkan"
+    },
+    "deleted": {
+      "successfully": "Pengguna berhasil dihapus"
+    },
+    "role": {
+      "assigned": {
+        "successfully": "Peran berhasil ditetapkan"
+      }
+    },
+    "permission": {
+      "granted": {
+        "successfully": "Izin berhasil diberikan"
+      },
+      "revoked": {
+        "successfully": "Izin berhasil dicabut"
+      }
+    }
+  },
+  "error": {
+    "user": {
+      "not": {
+        "found": "Pengguna tidak ditemukan"
+      },
+      "deactivated": "Akun pengguna tidak aktif"
+    },
+    "email": {
+      "already": {
+        "exists": "Email sudah terdaftar"
+      }
+    },
+    "invalid": {
+      "email": {
+        "format": "Format email tidak valid"
+      },
+      "password": "Kata sandi tidak valid",
+      "credentials": "Email atau kata sandi salah",
+      "role": "Peran tidak valid"
+    },
+    "unauthorized": {
+      "access": "Akses tidak diizinkan"
+    },
+    "insufficient": {
+      "permissions": "Izin tidak mencukupi"
+    },
+    "operation": {
+      "failed": "Operasi gagal"
+    },
+    "database": {
+      "error": "Terjadi kesalahan database"
+    },
+    "validation": {
+      "error": "Kesalahan validasi"
+    }
+  },
+  "validation": {
+    "email": {
+      "required": "Email wajib diisi",
+      "invalid": "Format email tidak valid"
+    },
+    "password": {
+      "required": "Kata sandi wajib diisi",
+      "too": {
+        "short": "Kata sandi minimal 8 karakter"
+      },
+      "special": {
+        "char": "Kata sandi harus mengandung karakter khusus"
+      },
+      "uppercase": "Kata sandi harus mengandung huruf besar",
+      "number": "Kata sandi harus mengandung angka"
+    },
+    "fullname": {
+      "required": "Nama lengkap wajib diisi",
+      "too": {
+        "short": "Nama lengkap minimal 2 karakter",
+        "long": "Nama lengkap maksimal 100 karakter"
+      }
+    },
+    "role": {
+      "required": "Peran wajib dipilih"
+    },
+    "phone": {
+      "invalid": "Nomor telepon tidak valid"
+    },
+    "userid": {
+      "required": "ID pengguna wajib diisi"
+    },
+    "permission": {
+      "required": "Izin wajib diisi"
+    }
+  },
+  "operation": {
+    "successful": "Operasi berhasil diselesaikan"
+  },
+  "please": {
+    "check": {
+      "your": {
+        "input": "Mohon periksa kembali isian Anda"
+      }
+    }
+  },
+  "confirm": {
+    "delete": {
+      "title": "Konfirmasi Hapus",
+      "message": "Apakah Anda yakin ingin menghapus item ini?"
+    }
+  },
+  "button": {
+    "yes": "Ya",
+    "no": "Tidak",
+    "cancel": "Batal",
+    "save": "Simpan",
+    "delete": "Hapus",
+    "edit": "Ubah",
+    "close": "Tutup"
+  },
+  "loading": "Memuat...",
+  "no": {
+    "data": {
+      "available": "Tidak ada data"
+    }
+  }
+}

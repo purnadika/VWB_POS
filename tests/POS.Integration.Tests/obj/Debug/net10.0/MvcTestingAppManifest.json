@@ -1,0 +1,6 @@
+{
+  "POS.Application, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null": "d:\\Projects\\NETPOS\\src\\POS.Application",
+  "POS.Domain, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null": "d:\\Projects\\NETPOS\\src\\POS.Domain",
+  "POS.Infrastructure, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null": "d:\\Projects\\NETPOS\\src\\POS.Infrastructure",
+  "POS.WebAPI, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null": "d:\\Projects\\NETPOS\\src\\POS.WebAPI"
+}

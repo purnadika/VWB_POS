@@ -1,0 +1,13 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/POS.Application/POS.Application.csproj" />
+    <Project Path="src/POS.Domain/POS.Domain.csproj" />
+    <Project Path="src/POS.Infrastructure/POS.Infrastructure.csproj" />
+    <Project Path="src/POS.WebAPI/POS.WebAPI.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/POS.Application.Tests/POS.Application.Tests.csproj" />
+    <Project Path="tests/POS.Domain.Tests/POS.Domain.Tests.csproj" />
+    <Project Path="tests/POS.UI.Tests/POS.UI.Tests.csproj" />
+  </Folder>
+</Solution>

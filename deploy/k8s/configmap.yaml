@@ -1,0 +1,18 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: netpos-config
+  namespace: netpos
+data:
+  ai-provider: "Ollama"
+  ai-endpoint: "http://netpos-ollama-service:11434"
+  ai-model-id: "llama3"
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: netpos-secrets
+  namespace: netpos
+type: Opaque
+stringData:
+  db-connection-string: "Data Source=/data/pos.db"

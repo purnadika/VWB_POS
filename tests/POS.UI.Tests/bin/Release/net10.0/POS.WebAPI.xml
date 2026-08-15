@@ -1,0 +1,142 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>POS.WebAPI</name>
+    </assembly>
+    <members>
+        <member name="T:POS.WebAPI.Controllers.UserManagementController">
+            <summary>
+            API Controller for User Management operations.
+            Implements REST conventions with proper HTTP semantics.
+            All endpoints support multi-language responses via Accept-Language header.
+            </summary>
+        </member>
+        <member name="M:POS.WebAPI.Controllers.UserManagementController.GetUser(System.Guid,System.String,System.Threading.CancellationToken)">
+            <summary>
+            Get a user by ID.
+            </summary>
+            <param name="id">The user ID (GUID)</param>
+            <returns>The user details</returns>
+        </member>
+        <member name="M:POS.WebAPI.Controllers.UserManagementController.GetUserByEmail(System.String,System.String,System.Threading.CancellationToken)">
+            <summary>
+            Get a user by email address.
+            </summary>
+            <param name="email">The user's email address</param>
+            <returns>The user details</returns>
+        </member>
+        <member name="M:POS.WebAPI.Controllers.UserManagementController.CreateUser(POS.Application.Features.UserManagement.DTOs.CreateUserRequest,System.String,System.Threading.CancellationToken)">
+            <summary>
+            Create a new user.
+            </summary>
+            <param name="request">The user creation request with email, password, role, etc.</param>
+            <returns>The created user details</returns>
+        </member>
+        <member name="M:POS.WebAPI.Controllers.UserManagementController.GetActiveUsers(System.Int32,System.Int32,System.String,System.Threading.CancellationToken)">
+            <summary>
+            Get all active users (paginated).
+            </summary>
+            <param name="pageNumber">The page number (default: 1)</param>
+            <param name="pageSize">The page size (default: 20, max: 100)</param>
+            <returns>Paginated list of active users</returns>
+        </member>
+        <member name="M:POS.WebAPI.Controllers.UserManagementController.AssignRole(System.Guid,POS.WebAPI.Controllers.AssignRoleRequest,System.String,System.Threading.CancellationToken)">
+            <summary>
+            Assign a role to a user.
+            </summary>
+            <param name="id">The user ID</param>
+            <param name="roleRequest">The role to assign</param>
+            <returns>Updated user details</returns>
+        </member>
+        <member name="M:POS.WebAPI.Controllers.UserManagementController.GrantPermission(System.Guid,POS.WebAPI.Controllers.GrantPermissionRequest,System.String,System.Threading.CancellationToken)">
+            <summary>
+            Grant a permission to a user.
+            </summary>
+            <param name="id">The user ID</param>
+            <param name="permissionRequest">The permission to grant</param>
+            <returns>Updated user details</returns>
+        </member>
+        <member name="M:POS.WebAPI.Controllers.UserManagementController.UpdateProfile(System.Guid,POS.Application.Features.UserManagement.DTOs.UpdateUserProfileRequest,System.String,System.Threading.CancellationToken)">
+            <summary>
+            Update user profile information.
+            </summary>
+            <param name="id">The user ID</param>
+            <param name="request">The updated profile information</param>
+            <returns>Updated user details</returns>
+        </member>
+        <member name="M:POS.WebAPI.Controllers.UserManagementController.DeactivateUser(System.Guid,System.String,System.Threading.CancellationToken)">
+            <summary>
+            Deactivate a user.
+            </summary>
+            <param name="id">The user ID</param>
+            <returns>Updated user details (IsActive = false)</returns>
+        </member>
+        <member name="M:POS.WebAPI.Controllers.UserManagementController.CheckPermission(System.Guid,POS.Domain.Enums.PermissionType,System.Threading.CancellationToken)">
+            <summary>
+            Check if a user has a specific permission.
+            </summary>
+            <param name="id">The user ID</param>
+            <param name="permission">The permission to check</param>
+            <returns>Boolean indicating if user has the permission</returns>
+        </member>
+        <member name="T:POS.WebAPI.Controllers.AssignRoleRequest">
+            <summary>
+            Request model for assigning a role to a user.
+            </summary>
+        </member>
+        <member name="T:POS.WebAPI.Controllers.GrantPermissionRequest">
+            <summary>
+            Request model for granting a permission to a user.
+            </summary>
+        </member>
+        <member name="T:Program">
+            <summary>
+            Auto-generated public partial Program class for top-level statement apps.
+            </summary>
+        </member>
+        <member name="M:Microsoft.AspNetCore.OpenApi.Generated.DocumentationCommentIdHelper.CreateDocumentationId(System.Type)">
+            <summary>
+            Generates a documentation comment ID for a type.
+            Example: T:Namespace.Outer+Inner`1 becomes T:Namespace.Outer.Inner`1
+            </summary>
+        </member>
+        <member name="M:Microsoft.AspNetCore.OpenApi.Generated.DocumentationCommentIdHelper.CreateDocumentationId(System.Reflection.PropertyInfo)">
+            <summary>
+            Generates a documentation comment ID for a property.
+            Example: P:Namespace.ContainingType.PropertyName or for an indexer P:Namespace.ContainingType.Item(System.Int32)
+            </summary>
+        </member>
+        <member name="M:Microsoft.AspNetCore.OpenApi.Generated.DocumentationCommentIdHelper.CreateDocumentationId(System.Type,System.String)">
+            <summary>
+            Generates a documentation comment ID for a property given its container type and property name.
+            Example: P:Namespace.ContainingType.PropertyName
+            </summary>
+        </member>
+        <member name="M:Microsoft.AspNetCore.OpenApi.Generated.DocumentationCommentIdHelper.CreateDocumentationId(System.Reflection.MethodInfo)">
+            <summary>
+            Generates a documentation comment ID for a method (or constructor).
+            For example:
+              M:Namespace.ContainingType.MethodName(ParamType1,ParamType2)~ReturnType
+              M:Namespace.ContainingType.#ctor(ParamType)
+            </summary>
+        </member>
+        <member name="M:Microsoft.AspNetCore.OpenApi.Generated.DocumentationCommentIdHelper.GetTypeDocId(System.Type,System.Boolean,System.Boolean)">
+            <summary>
+            Generates a documentation ID string for a type.
+            This method handles nested types (replacing '+' with '.'),
+            generic types, arrays, pointers, by-ref types, and generic parameters.
+            The <paramref name="includeGenericArguments"/> flag controls whether
+            constructed generic type arguments are emitted, while <paramref name="omitGenericArity"/>
+            controls whether the generic arity marker (e.g. "`1") is appended.
+            </summary>
+        </member>
+        <member name="M:Microsoft.AspNetCore.OpenApi.Generated.DocumentationCommentIdHelper.NormalizeDocId(System.String)">
+            <summary>
+            Normalizes a documentation comment ID to match the compiler-style format.
+            Strips the return type suffix for ordinary methods but retains it for conversion operators.
+            </summary>
+            <param name="docId">The documentation comment ID to normalize.</param>
+            <returns>The normalized documentation comment ID.</returns>
+        </member>
+    </members>
+</doc>

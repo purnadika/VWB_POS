@@ -1,0 +1,59 @@
+version: '3.9'
+
+services:
+  # ASP.NET Core POS API
+  pos.api:
+    build:
+      context: ..
+      dockerfile: deploy/Dockerfile
+    container_name: netpos_api
+    ports:
+      - "5000:8080"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ConnectionStrings__DefaultConnection=Host=pos.db;Port=5432;Database=pos;Username=postgres;Password=postgres
+      - AI__Provider=Ollama
+      - AI__Endpoint=http://pos.ollama:11434
+      - AI__ModelId=llama3
+    depends_on:
+      - pos.db
+      - pos.ollama
+    restart: unless-stopped
+    networks:
+      - pos_network
+
+  # PostgreSQL Database
+  pos.db:
+    image: postgres:15-alpine
+    container_name: netpos_db
+    environment:
+      POSTGRES_DB: pos
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - pos_db_data:/var/lib/postgresql/data
+    restart: unless-stopped
+    networks:
+      - pos_network
+
+  # Ollama local LLM for AI Copilot (no cloud required)
+  pos.ollama:
+    image: ollama/ollama:latest
+    container_name: netpos_ollama
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama_data:/root/.ollama
+    restart: unless-stopped
+    networks:
+      - pos_network
+
+volumes:
+  pos_db_data:
+  ollama_data:
+
+networks:
+  pos_network:
+    driver: bridge

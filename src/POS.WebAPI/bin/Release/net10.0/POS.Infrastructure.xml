@@ -1,0 +1,44 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>POS.Infrastructure</name>
+    </assembly>
+    <members>
+        <member name="T:POS.Infrastructure.AI.MockChatClient">
+            <summary>
+            Fallback mock IChatClient used when no AI backend is configured.
+            Returns deterministic demo responses so the app boots and runs without Ollama.
+            </summary>
+        </member>
+        <member name="T:POS.Infrastructure.Migrations.CreateUserManagementSchema">
+            <inheritdoc />
+        </member>
+        <member name="M:POS.Infrastructure.Migrations.CreateUserManagementSchema.Up(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:POS.Infrastructure.Migrations.CreateUserManagementSchema.Down(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:POS.Infrastructure.Migrations.CreateUserManagementSchema.BuildTargetModel(Microsoft.EntityFrameworkCore.ModelBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="T:POS.Infrastructure.Persistence.Repositories.UserRepository">
+            <summary>
+            Repository implementation for User aggregate.
+            Handles persistence operations for users with Guid-based IDs.
+            </summary>
+        </member>
+        <member name="T:POS.Infrastructure.Services.CurrencyService">
+            <summary>
+            Implementation of currency service.
+            Manages ISO 4217 currency codes and exchange rates.
+            </summary>
+        </member>
+        <member name="T:POS.Infrastructure.Services.LocalizationService">
+            <summary>
+            Implementation of localization service using JSON files.
+            Loads translations from i18n/[language].json files.
+            </summary>
+        </member>
+    </members>
+</doc>

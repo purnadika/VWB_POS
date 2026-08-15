@@ -1,0 +1,14 @@
+D:\Projects\NETPOS\src\POS.Domain\bin\Release\net10.0\POS.Domain.deps.json
+D:\Projects\NETPOS\src\POS.Domain\bin\Release\net10.0\POS.Domain.dll
+D:\Projects\NETPOS\src\POS.Domain\bin\Release\net10.0\POS.Domain.pdb
+D:\Projects\NETPOS\src\POS.Domain\obj\Release\net10.0\POS.Domain.GeneratedMSBuildEditorConfig.editorconfig
+D:\Projects\NETPOS\src\POS.Domain\obj\Release\net10.0\POS.Domain.AssemblyInfoInputs.cache
+D:\Projects\NETPOS\src\POS.Domain\obj\Release\net10.0\POS.Domain.AssemblyInfo.cs
+D:\Projects\NETPOS\src\POS.Domain\obj\Release\net10.0\POS.Domain.csproj.CoreCompileInputs.cache
+D:\Projects\NETPOS\src\POS.Domain\obj\Release\net10.0\POS.Domain.sourcelink.json
+D:\Projects\NETPOS\src\POS.Domain\obj\Release\net10.0\POS.Domain.dll
+D:\Projects\NETPOS\src\POS.Domain\obj\Release\net10.0\refint\POS.Domain.dll
+D:\Projects\NETPOS\src\POS.Domain\obj\Release\net10.0\POS.Domain.pdb
+D:\Projects\NETPOS\src\POS.Domain\obj\Release\net10.0\ref\POS.Domain.dll
+D:\Projects\NETPOS\src\POS.Domain\bin\Release\net10.0\POS.Domain.xml
+D:\Projects\NETPOS\src\POS.Domain\obj\Release\net10.0\POS.Domain.xml

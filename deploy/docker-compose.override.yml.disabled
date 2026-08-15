@@ -1,0 +1,24 @@
+version: '3.9'
+
+# Development overrides — hot reload + verbose logging
+services:
+  pos.api:
+    build:
+      context: ..
+      dockerfile: deploy/Dockerfile
+      target: build          # Use the build stage for dev (SDK available)
+    ports:
+      - "5000:8080"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ConnectionStrings__DefaultConnection=Data Source=/data/pos_dev.db
+      - AI__Provider=Ollama
+      - AI__Endpoint=http://pos.ollama:11434
+      - AI__ModelId=llama3
+    volumes:
+      - pos_dev_data:/data
+      - ../src:/src          # Live source mount for hot-reload scenarios
+    command: dotnet watch run --no-launch-profile --project /src/POS.WebAPI/POS.WebAPI.csproj
+
+volumes:
+  pos_dev_data:

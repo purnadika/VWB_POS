@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NETPOS — Metro Point of Sale & AI Copilot</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="index.css">
+</head>
+<body class="metro-dark">
+
+    <!-- App Shell -->
+    <div class="app-shell">
+        
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="logo">
+                    <span class="logo-accent">[]</span> NETPOS
+                </div>
+                <div class="logo-sub">Enterprise Agentic Suite</div>
+            </div>
+            <nav class="nav-menu">
+                <a href="#dashboard" class="nav-item active" id="nav-dashboard">
+                    <span class="icon">▤</span> Dashboard
+                </a>
+                <a href="#checkout" class="nav-item" id="nav-checkout">
+                    <span class="icon">🛒</span> POS Checkout
+                </a>
+                <a href="#items" class="nav-item" id="nav-items">
+                    <span class="icon">📦</span> Catalog Items
+                </a>
+                <a href="#ai-copilot" class="nav-item" id="nav-ai-copilot">
+                    <span class="icon">✦</span> AI Copilot
+                </a>
+            </nav>
+            <div class="sidebar-footer">
+                <div class="user-profile">
+                    <div class="user-avatar">A</div>
+                    <div class="user-info">
+                        <div class="user-name">Admin User</div>
+                        <div class="user-role">Store Manager</div>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Workspace -->
+        <main class="workspace">
+            
+            <!-- Top Header -->
+            <header class="workspace-header">
+                <h1 id="page-title">Dashboard</h1>
+                <div class="workspace-actions">
+                    <span class="status-indicator online"></span>
+                    <span class="status-text">Connected</span>
+                </div>
+            </header>
+
+            <!-- Content Area -->
+            <div class="workspace-content">
+                
+                <!-- DASHBOARD VIEW -->
+                <section id="view-dashboard" class="view-section active">
+                    <div class="metro-grid">
+                        <div class="metro-tile double accent-blue">
+                            <div class="tile-content">
+                                <div class="tile-header">Today's Sales</div>
+                                <div class="tile-value">$1,240.50</div>
+                                <div class="tile-footer">+12% from yesterday</div>
+                            </div>
+                        </div>
+                        <div class="metro-tile accent-green">
+                            <div class="tile-content">
+                                <div class="tile-header">Transactions</div>
+                                <div class="tile-value">18</div>
+                                <div class="tile-footer">Avg. $68.90</div>
+                            </div>
+                        </div>
+                        <div class="metro-tile accent-purple">
+                            <div class="tile-content">
+                                <div class="tile-header">Active Till</div>
+                                <div class="tile-value">Open</div>
+                                <div class="tile-footer">Started at 8:00 AM</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card margin-top">
+                        <div class="card-header">Low Stock Warnings</div>
+                        <div class="card-body">
+                            <table class="metro-table">
+                                <thead>
+                                    <tr>
+                                        <th>SKU</th>
+                                        <th>Item Name</th>
+                                        <th>Current Stock</th>
+                                        <th>Reorder Level</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>SKU-MOUSE-100</td>
+                                        <td>Wireless Mouse</td>
+                                        <td>20</td>
+                                        <td>5</td>
+                                        <td><span class="badge ok">Healthy</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td>SKU-KEYBOARD-200</td>
+                                        <td>Mechanical Keyboard</td>
+                                        <td>10</td>
+                                        <td>3</td>
+                                        <td><span class="badge ok">Healthy</span></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- CHECKOUT VIEW -->
+                <section id="view-checkout" class="view-section">
+                    <div class="checkout-layout">
+                        <!-- Product Selection -->
+                        <div class="product-panel">
+                            <div class="search-bar">
+                                <input type="text" id="checkout-search" placeholder="Search catalog by name or SKU...">
+                            </div>
+                            <div class="product-grid" id="checkout-product-grid">
+                                <!-- Dynamically filled -->
+                            </div>
+                        </div>
+
+                        <!-- Cart and Summary -->
+                        <div class="cart-panel">
+                            <h2 class="section-title">Current Order</h2>
+                            <div class="cart-items" id="cart-items-container">
+                                <div class="empty-cart-message">Cart is empty. Click items to add.</div>
+                            </div>
+                            <div class="cart-summary">
+                                <div class="summary-line">
+                                    <span>Subtotal</span>
+                                    <span id="summary-subtotal">$0.00</span>
+                                </div>
+                                <div class="summary-line">
+                                    <span>Tax (10% VAT)</span>
+                                    <span id="summary-tax">$0.00</span>
+                                </div>
+                                <div class="summary-line total">
+                                    <span>Total</span>
+                                    <span id="summary-total">$0.00</span>
+                                </div>
+                            </div>
+                            <div class="payment-selection">
+                                <label for="payment-method">Payment Method</label>
+                                <select id="payment-method">
+                                    <option value="0">Cash</option>
+                                    <option value="1">Credit Card</option>
+                                    <option value="2">Debit Card</option>
+                                </select>
+                            </div>
+                            <button class="btn btn-primary btn-block margin-top" id="btn-checkout">Complete Checkout</button>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- CATALOG ITEMS VIEW -->
+                <section id="view-items" class="view-section">
+                    <div class="card">
+                        <div class="card-header flex-header">
+                            <span>Catalog Items</span>
+                            <button class="btn btn-primary" id="btn-add-item-modal">Add New Item</button>
+                        </div>
+                        <div class="card-body">
+                            <table class="metro-table" id="catalog-table">
+                                <thead>
+                                    <tr>
+                                        <th>SKU</th>
+                                        <th>Name</th>
+                                        <th>Category</th>
+                                        <th>Cost Price</th>
+                                        <th>Unit Price</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="catalog-table-body">
+                                    <!-- Filled by JS -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- AI COPILOT VIEW -->
+                <section id="view-ai-copilot" class="view-section">
+                    <div class="copilot-container">
+                        <div class="copilot-sidebar">
+                            <h3 class="sidebar-section-title">Suggested Prompts</h3>
+                            <div class="prompt-chip" data-prompt="Show inventory status for keyboard">"Show inventory status for keyboard"</div>
+                            <div class="prompt-chip" data-prompt="Summarize today's sales">"Summarize today's sales"</div>
+                            <div class="prompt-chip" data-prompt="Draft a purchase order for restocking">"Draft a purchase order for restocking"</div>
+                        </div>
+                        <div class="copilot-chat-area">
+                            <div class="chat-log" id="copilot-chat-log">
+                                <div class="chat-message system">
+                                    ✦ Hello! I am your POS Assistant Agent. Ask me questions about inventory, sales summaries, or purchase orders. I am connected to the live database and can execute tools.
+                                </div>
+                            </div>
+                            <div class="chat-input-bar">
+                                <input type="text" id="copilot-input" placeholder="Ask your Assistant agent anything...">
+                                <button class="btn btn-primary" id="btn-send-copilot">Send</button>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+            </div>
+        </main>
+    </div>
+
+    <!-- Receipt Dialog -->
+    <div class="modal-backdrop" id="receipt-modal">
+        <div class="modal receipt-modal-content">
+            <div class="receipt-header">
+                <h2>NETPOS RECEIPT</h2>
+                <p>123 Nowhere Street</p>
+                <p id="receipt-invoice-num">INV-XXXX</p>
+            </div>
+            <div class="receipt-divider"></div>
+            <div class="receipt-body" id="receipt-items-container">
+                <!-- Filled dynamically -->
+            </div>
+            <div class="receipt-divider"></div>
+            <div class="receipt-totals">
+                <div class="summary-line"><span>Subtotal:</span><span id="receipt-subtotal">$0.00</span></div>
+                <div class="summary-line"><span>Tax (10% VAT):</span><span id="receipt-tax">$0.00</span></div>
+                <div class="summary-line total"><span>Total Paid:</span><span id="receipt-total">$0.00</span></div>
+            </div>
+            <div class="receipt-footer">
+                <p>Thank you for your purchase!</p>
+                <button class="btn btn-secondary margin-top" id="btn-close-receipt">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="index.js"></script>
+</body>
+</html>

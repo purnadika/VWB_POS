@@ -1,0 +1,120 @@
+﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
+using POS.Domain.Aggregates.UserManagement;
+using POS.Domain.Interfaces.Repositories;
+using POS.Domain.ValueObjects;
+
+namespace POS.Infrastructure.Persistence.Repositories;
+
+/// <summary>
+/// Repository implementation for User aggregate.
+/// Handles persistence operations for users.
+/// </summary>
+public class UserRepository : Repository<User>, IUserRepository
+{
+    private readonly ILogger<UserRepository> _logger;
+
+    public UserRepository(POSDbContext context, ILogger<UserRepository> logger)
+        : base(context)
+    {
+        _logger = logger;
+    }
+
+    public async Task<User?> FindByEmailAsync(Email email, CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            var user = await DbContext.Set<User>()
+                .FirstOrDefaultAsync(u => u.Email == email, cancellationToken);
+
+            return user;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError($"Error finding user by email: {ex.Message}");
+            throw;
+        }
+    }
+
+    public async Task<User?> FindByEmailAsync(string email, CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            var emailVo = new Email(email);
+            return await FindByEmailAsync(emailVo, cancellationToken);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError($"Error finding user by email string: {ex.Message}");
+            throw;
+        }
+    }
+
+    public async Task<IEnumerable<User>> GetActiveUsersAsync(CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            var users = await DbContext.Set<User>()
+                .Where(u => u.IsActive)
+                .OrderBy(u => u.Email)
+                .ToListAsync(cancellationToken);
+
+            return users;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError($"Error getting active users: {ex.Message}");
+            throw;
+        }
+    }
+
+    public async Task<IEnumerable<User>> GetInactiveUsersAsync(CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            var users = await DbContext.Set<User>()
+                .Where(u => !u.IsActive)
+                .OrderBy(u => u.Email)
+                .ToListAsync(cancellationToken);
+
+            return users;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError($"Error getting inactive users: {ex.Message}");
+            throw;
+        }
+    }
+
+    public async Task<bool> EmailExistsAsync(Email email, CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            var exists = await DbContext.Set<User>()
+                .AnyAsync(u => u.Email == email, cancellationToken);
+
+            return exists;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError($"Error checking if email exists: {ex.Message}");
+            throw;
+        }
+    }
+
+    public async Task<bool> EmailExistsAsync(Email email, Guid excludeUserId, CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            var exists = await DbContext.Set<User>()
+                .AnyAsync(u => u.Email == email && u.Id != excludeUserId, cancellationToken);
+
+            return exists;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError($"Error checking if email exists (excluding user): {ex.Message}");
+            throw;
+        }
+    }
+}

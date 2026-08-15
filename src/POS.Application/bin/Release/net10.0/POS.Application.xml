@@ -1,0 +1,213 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>POS.Application</name>
+    </assembly>
+    <members>
+        <member name="T:POS.Application.Constants.DefaultValues">
+            <summary>
+            Default configuration values for the application.
+            NO MAGIC NUMBERS - all defaults are constants.
+            </summary>
+        </member>
+        <member name="T:POS.Application.Constants.LocalizationKeys">
+            <summary>
+            All localization keys used in the application.
+            NO MAGIC STRINGS - all user-facing text is referenced by constant keys.
+            These keys are looked up via ILocalizationService to get translated strings.
+            </summary>
+        </member>
+        <member name="T:POS.Application.Features.UserManagement.Commands.CreateUserCommand">
+            <summary>
+            CQRS Command to create a new user.
+            Follows single responsibility: only carries input data.
+            </summary>
+        </member>
+        <member name="T:POS.Application.Features.UserManagement.Commands.AssignRoleCommand">
+            <summary>
+            CQRS Command to assign a role to a user.
+            </summary>
+        </member>
+        <member name="T:POS.Application.Features.UserManagement.Commands.GrantPermissionCommand">
+            <summary>
+            CQRS Command to grant a permission to a user.
+            </summary>
+        </member>
+        <member name="T:POS.Application.Features.UserManagement.Commands.DeactivateUserCommand">
+            <summary>
+            CQRS Command to deactivate a user.
+            </summary>
+        </member>
+        <member name="T:POS.Application.Features.UserManagement.Commands.ActivateUserCommand">
+            <summary>
+            CQRS Command to activate a user.
+            </summary>
+        </member>
+        <member name="T:POS.Application.Features.UserManagement.Commands.UpdateUserProfileCommand">
+            <summary>
+            CQRS Command to update user profile information.
+            </summary>
+        </member>
+        <member name="T:POS.Application.Features.UserManagement.Commands.Validators.CreateUserCommandValidator">
+            <summary>
+            Validator for CreateUserCommand.
+            Enforces all business rules for user creation.
+            NO MAGIC VALUES - all constants used.
+            </summary>
+        </member>
+        <member name="T:POS.Application.Features.UserManagement.Commands.Validators.AssignRoleCommandValidator">
+            <summary>
+            Validator for AssignRoleCommand.
+            </summary>
+        </member>
+        <member name="T:POS.Application.Features.UserManagement.Commands.Validators.GrantPermissionCommandValidator">
+            <summary>
+            Validator for GrantPermissionCommand.
+            </summary>
+        </member>
+        <member name="T:POS.Application.Features.UserManagement.Commands.Validators.DeactivateUserCommandValidator">
+            <summary>
+            Validator for DeactivateUserCommand.
+            </summary>
+        </member>
+        <member name="T:POS.Application.Features.UserManagement.Commands.Validators.UpdateUserProfileCommandValidator">
+            <summary>
+            Validator for UpdateUserProfileCommand.
+            </summary>
+        </member>
+        <member name="T:POS.Application.Features.UserManagement.DTOs.UserResponse">
+            <summary>
+            Response DTO for User aggregate.
+            Only contains data that should be exposed in API responses (never includes PasswordHash).
+            </summary>
+        </member>
+        <member name="T:POS.Application.Features.UserManagement.DTOs.CreateUserRequest">
+            <summary>
+            Request DTO for creating a new user.
+            Separated from query/command for clear input validation boundary.
+            </summary>
+        </member>
+        <member name="T:POS.Application.Features.UserManagement.DTOs.UpdateUserProfileRequest">
+            <summary>
+            Request DTO for updating user profile.
+            </summary>
+        </member>
+        <member name="T:POS.Application.Features.UserManagement.DTOs.PagedResult`1">
+            <summary>
+            Paged result wrapper for list queries.
+            </summary>
+        </member>
+        <member name="T:POS.Application.Features.UserManagement.Handlers.GetUserQueryHandler">
+            <summary>
+            Handler for GetUserQuery - retrieves a single user by ID.
+            </summary>
+        </member>
+        <member name="T:POS.Application.Features.UserManagement.Queries.GetUserQuery">
+            <summary>
+            CQRS Query to get a user by ID.
+            </summary>
+        </member>
+        <member name="T:POS.Application.Features.UserManagement.Queries.GetUserByEmailQuery">
+            <summary>
+            CQRS Query to get a user by email.
+            </summary>
+        </member>
+        <member name="T:POS.Application.Features.UserManagement.Queries.ListActiveUsersQuery">
+            <summary>
+            CQRS Query to list all active users with pagination.
+            </summary>
+        </member>
+        <member name="T:POS.Application.Features.UserManagement.Queries.ListInactiveUsersQuery">
+            <summary>
+            CQRS Query to list all inactive users with pagination.
+            </summary>
+        </member>
+        <member name="T:POS.Application.Features.UserManagement.Queries.GetUsersByRoleQuery">
+            <summary>
+            CQRS Query to get all users with a specific role.
+            </summary>
+        </member>
+        <member name="T:POS.Application.Features.UserManagement.Queries.CheckUserPermissionQuery">
+            <summary>
+            CQRS Query to check if a user has a specific permission.
+            </summary>
+        </member>
+        <member name="T:POS.Application.Services.ICurrencyService">
+            <summary>
+            Service for handling multi-currency operations.
+            Manages currency codes, exchange rates, and conversions.
+            </summary>
+        </member>
+        <member name="M:POS.Application.Services.ICurrencyService.GetAvailableCurrencies">
+            <summary>
+            Gets all available currency codes (ISO 4217).
+            </summary>
+        </member>
+        <member name="M:POS.Application.Services.ICurrencyService.GetCurrency(System.String)">
+            <summary>
+            Gets currency details by code.
+            </summary>
+            <param name="code">ISO 4217 currency code (e.g., "USD", "EUR")</param>
+            <returns>Currency code and name, or null if not found</returns>
+        </member>
+        <member name="M:POS.Application.Services.ICurrencyService.IsCurrencyValid(System.String)">
+            <summary>
+            Checks if a currency code is valid.
+            </summary>
+        </member>
+        <member name="M:POS.Application.Services.ICurrencyService.GetDefaultCurrency">
+            <summary>
+            Gets the default currency for the system.
+            </summary>
+        </member>
+        <member name="M:POS.Application.Services.ICurrencyService.GetExchangeRateAsync(System.String,System.String)">
+            <summary>
+            Gets the exchange rate between two currencies.
+            For now, returns 1.0 (rates would be fetched from external service in production).
+            </summary>
+        </member>
+        <member name="M:POS.Application.Services.ICurrencyService.ConvertAsync(System.Decimal,System.String,System.String)">
+            <summary>
+            Converts an amount from one currency to another.
+            </summary>
+        </member>
+        <member name="T:POS.Application.Services.ILocalizationService">
+            <summary>
+            Service for retrieving localized strings based on language and localization key.
+            NO MAGIC STRINGS - all user-facing text goes through this service.
+            </summary>
+        </member>
+        <member name="M:POS.Application.Services.ILocalizationService.GetString(System.String,System.String)">
+            <summary>
+            Gets a localized string by key.
+            </summary>
+            <param name="key">The localization key (e.g., "user.created.successfully")</param>
+            <param name="locale">The language code (e.g., "en", "fr"). Defaults to system default.</param>
+            <returns>The localized string, or the key if translation not found</returns>
+        </member>
+        <member name="M:POS.Application.Services.ILocalizationService.GetString(System.String,System.Collections.Generic.Dictionary{System.String,System.Object},System.String)">
+            <summary>
+            Gets a localized string with parameter substitution.
+            </summary>
+            <param name="key">The localization key</param>
+            <param name="parameters">Dictionary of parameters to substitute in the string</param>
+            <param name="locale">The language code</param>
+            <returns>The localized string with parameters substituted</returns>
+        </member>
+        <member name="M:POS.Application.Services.ILocalizationService.GetAvailableLanguages">
+            <summary>
+            Gets all available language codes.
+            </summary>
+        </member>
+        <member name="M:POS.Application.Services.ILocalizationService.GetDefaultLanguage">
+            <summary>
+            Gets the default language code for the application.
+            </summary>
+        </member>
+        <member name="M:POS.Application.Services.ILocalizationService.IsLanguageAvailable(System.String)">
+            <summary>
+            Checks if a language is available.
+            </summary>
+        </member>
+    </members>
+</doc>

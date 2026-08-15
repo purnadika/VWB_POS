@@ -1,0 +1,38 @@
+﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using Npgsql;
+using POS.Domain.Interfaces.Repositories;
+using POS.Infrastructure.AI;
+using POS.Infrastructure.Persistence;
+using POS.Infrastructure.Persistence.Repositories;
+
+namespace POS.Infrastructure;
+
+public static class DependencyInjection
+{
+    public static IServiceCollection AddInfrastructureServices(this IServiceCollection services, IConfiguration configuration)
+    {
+        // Configure PostgreSQL connection
+        var connectionString = configuration.GetConnectionString("DefaultConnection") 
+            ?? "Host=localhost;Port=5432;Database=vwb_pos;Username=postgres;Password=postgres";
+
+        services.AddDbContext<POSDbContext>(options =>
+            options.UseNpgsql(connectionString));
+
+        services.AddScoped<IUnitOfWork>(sp => sp.GetRequiredService<POSDbContext>());
+
+        // Repositories
+        services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
+        services.AddScoped<IItemRepository, ItemRepository>();
+        services.AddScoped<ISaleRepository, SaleRepository>();
+        services.AddScoped<ICustomerRepository, CustomerRepository>();
+        services.AddScoped<IEmployeeRepository, EmployeeRepository>();
+        services.AddScoped<IAppConfigRepository, AppConfigRepository>();
+
+        // AI client registration
+        services.AddPOSAiClient(configuration);
+
+        return services;
+    }
+}

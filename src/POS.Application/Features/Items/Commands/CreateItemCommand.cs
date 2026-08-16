@@ -10,7 +10,7 @@ namespace POS.Application.Features.Items.Commands;
 
 public record CreateItemCommand(
     string Name,
-    string Category,
+    int? CategoryId,
     string ItemNumber,
     string Description,
     decimal CostPrice,
@@ -28,7 +28,6 @@ public class CreateItemCommandValidator : AbstractValidator<CreateItemCommand>
     public CreateItemCommandValidator()
     {
         RuleFor(x => x.Name).NotEmpty().MaximumLength(255);
-        RuleFor(x => x.Category).NotEmpty().MaximumLength(255);
         RuleFor(x => x.CostPrice).GreaterThanOrEqualTo(0);
         RuleFor(x => x.UnitPrice).GreaterThanOrEqualTo(0);
     }
@@ -50,7 +49,7 @@ public class CreateItemCommandHandler : IRequestHandler<CreateItemCommand, Resul
         var item = new Item
         {
             Name = request.Name,
-            Category = request.Category,
+            CategoryId = request.CategoryId,
             ItemNumber = request.ItemNumber,
             Description = request.Description,
             CostPrice = request.CostPrice,

@@ -13,6 +13,7 @@
 
   <ItemGroup>
     <!-- API Documentation & Swagger -->
+    <PackageReference Include="BCrypt.Net-Next" Version="4.2.0" />
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.8" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="7.0.0" />
     <!-- Entity Framework Core Design (required for dotnet ef commands) -->

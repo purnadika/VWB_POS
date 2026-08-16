@@ -18,12 +18,14 @@ public class POSDbContext : DbContext, IUnitOfWork
 
     // User Management Aggregate
     public DbSet<User> Users => Set<User>();
+    public DbSet<AuthLog> AuthLogs => Set<AuthLog>();
 
     public DbSet<Person> People => Set<Person>();
     public DbSet<Customer> Customers => Set<Customer>();
     public DbSet<Employee> Employees => Set<Employee>();
     public DbSet<Supplier> Suppliers => Set<Supplier>();
     public DbSet<Item> Items => Set<Item>();
+    public DbSet<ItemCategory> ItemCategories => Set<ItemCategory>();
     public DbSet<StockLocation> StockLocations => Set<StockLocation>();
     public DbSet<ItemQuantity> ItemQuantities => Set<ItemQuantity>();
     public DbSet<ItemKit> ItemKits => Set<ItemKit>();

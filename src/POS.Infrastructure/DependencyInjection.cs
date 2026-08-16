@@ -32,6 +32,7 @@ public static class DependencyInjection
         services.AddScoped<ICustomerRepository, CustomerRepository>();
         services.AddScoped<IEmployeeRepository, EmployeeRepository>();
         services.AddScoped<IAppConfigRepository, AppConfigRepository>();
+        services.AddScoped<IAuthLogRepository, AuthLogRepository>();
 
         // Services
         services.AddSingleton<ILocalizationService>(sp =>

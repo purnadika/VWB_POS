@@ -22,3 +22,8 @@ D:\Projects\NETPOS\src\POS.Infrastructure\bin\Release\net10.0\POS.Infrastructure
 D:\Projects\NETPOS\src\POS.Infrastructure\bin\Release\net10.0\POS.Application.xml
 D:\Projects\NETPOS\src\POS.Infrastructure\bin\Release\net10.0\POS.Domain.xml
 D:\Projects\NETPOS\src\POS.Infrastructure\obj\Release\net10.0\POS.Infrastructure.xml
+D:\app\build\POS.Infrastructure.deps.json
+D:\app\build\POS.Infrastructure.runtimeconfig.json
+D:\app\build\POS.Infrastructure.dll
+D:\app\build\POS.Infrastructure.pdb
+D:\app\build\POS.Infrastructure.xml

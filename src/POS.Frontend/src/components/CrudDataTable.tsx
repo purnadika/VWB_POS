@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect, createContext, useContext } from 'react';
+import React, { useState, useEffect, createContext, useContext } from 'react';
 
 import { Plus, Edit2, Trash2, X } from 'lucide-react';
 import { fetchApi } from '../utils/api';
@@ -13,8 +13,9 @@ export interface ColumnDef<T> {
 export interface FormFieldDef {
   name: string;
   label: string;
-  type: 'text' | 'number' | 'email' | 'checkbox' | 'date';
+  type: 'text' | 'number' | 'email' | 'checkbox' | 'date' | 'select';
   required?: boolean;
+  options?: { label: string; value: any }[];
 }
 
 interface CrudDataTableProps<T> {
@@ -191,20 +192,37 @@ export function CrudDataTable<T extends Record<string, any>>({
                 {formFields.map((field) => (
                   <div className="form-group" key={field.name}>
                     <label htmlFor={`field-${field.name}`}>{field.label}</label>
-                    <input
-                      id={`field-${field.name}`}
-                      type={field.type}
-                      required={field.required}
-                      value={
-                        formData[field.name] === undefined 
-                          ? '' 
-                          : (field.type === 'date' && formData[field.name] 
-                              ? String(formData[field.name]).split('T')[0] 
-                              : formData[field.name])
-                      }
-                      onChange={(e) => handleInputChange(field.name, field.type === 'checkbox' ? e.target.checked : e.target.value, field.type)}
-                      className="form-control"
-                    />
+                    {field.type === 'select' ? (
+                      <select
+                        id={`field-${field.name}`}
+                        required={field.required}
+                        value={formData[field.name] ?? ''}
+                        onChange={(e) => handleInputChange(field.name, e.target.value, field.type)}
+                        className="form-control"
+                      >
+                        <option value="">Select an option</option>
+                        {field.options?.map((opt, i) => (
+                          <option key={i} value={opt.value}>
+                            {opt.label}
+                          </option>
+                        ))}
+                      </select>
+                    ) : (
+                      <input
+                        id={`field-${field.name}`}
+                        type={field.type}
+                        required={field.required}
+                        value={
+                          formData[field.name] === undefined 
+                            ? '' 
+                            : (field.type === 'date' && formData[field.name] 
+                                ? String(formData[field.name]).split('T')[0] 
+                                : formData[field.name])
+                        }
+                        onChange={(e) => handleInputChange(field.name, field.type === 'checkbox' ? e.target.checked : e.target.value, field.type)}
+                        className="form-control"
+                      />
+                    )}
                   </div>
                 ))}
               </div>

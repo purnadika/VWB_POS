@@ -22,6 +22,54 @@
         <member name="M:POS.Infrastructure.Migrations.CreateUserManagementSchema.BuildTargetModel(Microsoft.EntityFrameworkCore.ModelBuilder)">
             <inheritdoc />
         </member>
+        <member name="T:POS.Infrastructure.Migrations.AddAuditTrailsAndSoftDeletes">
+            <inheritdoc />
+        </member>
+        <member name="M:POS.Infrastructure.Migrations.AddAuditTrailsAndSoftDeletes.Up(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:POS.Infrastructure.Migrations.AddAuditTrailsAndSoftDeletes.Down(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:POS.Infrastructure.Migrations.AddAuditTrailsAndSoftDeletes.BuildTargetModel(Microsoft.EntityFrameworkCore.ModelBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="T:POS.Infrastructure.Migrations.AddAuthLogAndAuditTrails">
+            <inheritdoc />
+        </member>
+        <member name="M:POS.Infrastructure.Migrations.AddAuthLogAndAuditTrails.Up(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:POS.Infrastructure.Migrations.AddAuthLogAndAuditTrails.Down(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:POS.Infrastructure.Migrations.AddAuthLogAndAuditTrails.BuildTargetModel(Microsoft.EntityFrameworkCore.ModelBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="T:POS.Infrastructure.Migrations.AddMessagesReportsAppConfigs">
+            <inheritdoc />
+        </member>
+        <member name="M:POS.Infrastructure.Migrations.AddMessagesReportsAppConfigs.Up(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:POS.Infrastructure.Migrations.AddMessagesReportsAppConfigs.Down(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:POS.Infrastructure.Migrations.AddMessagesReportsAppConfigs.BuildTargetModel(Microsoft.EntityFrameworkCore.ModelBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="T:POS.Infrastructure.Migrations.AddItemCategory">
+            <inheritdoc />
+        </member>
+        <member name="M:POS.Infrastructure.Migrations.AddItemCategory.Up(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:POS.Infrastructure.Migrations.AddItemCategory.Down(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:POS.Infrastructure.Migrations.AddItemCategory.BuildTargetModel(Microsoft.EntityFrameworkCore.ModelBuilder)">
+            <inheritdoc />
+        </member>
         <member name="T:POS.Infrastructure.Persistence.Repositories.UserRepository">
             <summary>
             Repository implementation for User aggregate.

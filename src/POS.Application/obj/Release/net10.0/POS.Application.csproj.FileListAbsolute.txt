@@ -17,3 +17,7 @@ D:\Projects\NETPOS\src\POS.Application\obj\Release\net10.0\ref\POS.Application.d
 D:\Projects\NETPOS\src\POS.Application\bin\Release\net10.0\POS.Application.xml
 D:\Projects\NETPOS\src\POS.Application\bin\Release\net10.0\POS.Domain.xml
 D:\Projects\NETPOS\src\POS.Application\obj\Release\net10.0\POS.Application.xml
+D:\app\build\POS.Application.deps.json
+D:\app\build\POS.Application.dll
+D:\app\build\POS.Application.pdb
+D:\app\build\POS.Application.xml

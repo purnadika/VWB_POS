@@ -75,15 +75,15 @@
             },
             "Microsoft.Extensions.AI": {
               "target": "Package",
-              "version": "[10.9.0, )"
+              "version": "[9.0.0-preview.9.24551.1, )"
             },
             "Microsoft.Extensions.Logging.Abstractions": {
               "target": "Package",
-              "version": "[10.0.11, )"
+              "version": "[10.0.0, )"
             },
             "Microsoft.SemanticKernel": {
               "target": "Package",
-              "version": "[1.79.0, )"
+              "version": "[1.32.0, )"
             },
             "Serilog": {
               "target": "Package",

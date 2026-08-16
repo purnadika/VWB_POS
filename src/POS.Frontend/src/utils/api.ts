@@ -28,6 +28,9 @@ export async function fetchApi<T>(endpoint: string, options: RequestInit = {}): 
         const parsed = JSON.parse(errorText);
         if (parsed.error) {
           errorMessage = parsed.error;
+        } else if (parsed.errors && typeof parsed.errors === 'object') {
+          const errorsList = Object.values(parsed.errors).flat();
+          errorMessage = errorsList.length > 0 ? errorsList.join(' ') : (parsed.title || parsed.message);
         } else if (parsed.message) {
           errorMessage = parsed.message;
         } else if (parsed.title) {

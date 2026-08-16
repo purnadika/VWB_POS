@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("POS.WebAPI")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Release")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+f878d6c4c596dc8239d07f7e32787fa2f18e8ee2")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+655f2637ace410f016de3cebc25a9542545a43fc")]
 [assembly: System.Reflection.AssemblyProductAttribute("POS.WebAPI")]
 [assembly: System.Reflection.AssemblyTitleAttribute("POS.WebAPI")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

@@ -1,0 +1,184 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>POS.Domain</name>
+    </assembly>
+    <members>
+        <member name="T:POS.Domain.Aggregates.UserManagement.Events.DomainEvent">
+            <summary>
+            Base class for domain events.
+            Domain events are published to communicate state changes to other parts of the system.
+            </summary>
+        </member>
+        <member name="T:POS.Domain.Aggregates.UserManagement.Events.UserCreatedDomainEvent">
+            <summary>
+            Domain event raised when a new user is created.
+            Used for audit trail and AI agent reasoning.
+            </summary>
+        </member>
+        <member name="T:POS.Domain.Aggregates.UserManagement.Events.UserRoleChangedDomainEvent">
+            <summary>
+            Domain event raised when a user's role is changed.
+            </summary>
+        </member>
+        <member name="T:POS.Domain.Aggregates.UserManagement.Events.UserPermissionGrantedDomainEvent">
+            <summary>
+            Domain event raised when permissions are granted to a user.
+            </summary>
+        </member>
+        <member name="T:POS.Domain.Aggregates.UserManagement.Events.UserDeactivatedDomainEvent">
+            <summary>
+            Domain event raised when a user is deactivated.
+            </summary>
+        </member>
+        <member name="T:POS.Domain.Aggregates.UserManagement.User">
+            <summary>
+            User aggregate root in User Management domain.
+            Encapsulates all business logic related to users, roles, and permissions.
+            Publishes domain events for audit trail and AI agent reasoning.
+            </summary>
+        </member>
+        <member name="M:POS.Domain.Aggregates.UserManagement.User.Create(System.String,System.String,POS.Domain.Enums.UserRole,System.String,System.String,System.String)">
+            <summary>
+            Creates a new user with the specified details.
+            Publishes UserCreatedDomainEvent for audit trail.
+            </summary>
+        </member>
+        <member name="M:POS.Domain.Aggregates.UserManagement.User.ChangeRole(POS.Domain.Enums.UserRole,System.String)">
+            <summary>
+            Changes the user's role and updates permissions accordingly.
+            Publishes UserRoleChangedDomainEvent.
+            </summary>
+        </member>
+        <member name="M:POS.Domain.Aggregates.UserManagement.User.GrantPermission(POS.Domain.Enums.PermissionType,System.String)">
+            <summary>
+            Grants a specific permission to the user.
+            Publishes UserPermissionGrantedDomainEvent.
+            </summary>
+        </member>
+        <member name="M:POS.Domain.Aggregates.UserManagement.User.RevokePermission(POS.Domain.Enums.PermissionType,System.String)">
+            <summary>
+            Revokes a specific permission from the user.
+            </summary>
+        </member>
+        <member name="M:POS.Domain.Aggregates.UserManagement.User.HasPermission(POS.Domain.Enums.PermissionType)">
+            <summary>
+            Checks if the user has a specific permission.
+            </summary>
+        </member>
+        <member name="M:POS.Domain.Aggregates.UserManagement.User.Deactivate(System.String)">
+            <summary>
+            Deactivates the user account.
+            Publishes UserDeactivatedDomainEvent.
+            </summary>
+        </member>
+        <member name="M:POS.Domain.Aggregates.UserManagement.User.Activate(System.String)">
+            <summary>
+            Reactivates the user account.
+            </summary>
+        </member>
+        <member name="M:POS.Domain.Aggregates.UserManagement.User.RecordLoginAttempt">
+            <summary>
+            Records the user's last login time.
+            </summary>
+        </member>
+        <member name="M:POS.Domain.Aggregates.UserManagement.User.UpdateProfile(System.String,System.String,System.String)">
+            <summary>
+            Updates the user's profile information.
+            </summary>
+        </member>
+        <member name="T:POS.Domain.Common.AggregateRoot">
+            <summary>
+            Base class for aggregate roots in Domain-Driven Design.
+            Aggregate roots are entities that are accessed directly and own related entities.
+            They act as transaction boundaries and are responsible for maintaining invariants.
+            </summary>
+        </member>
+        <member name="T:POS.Domain.ValueObjects.ValueObject">
+            <summary>
+            Base class for value objects that implement equality based on component values.
+            Value objects are immutable and compared by their attributes, not identity.
+            </summary>
+        </member>
+        <member name="T:POS.Domain.ValueObjects.Email">
+            <summary>
+            Email value object ensures email addresses are always valid and immutable.
+            Implements value object pattern with equality based on email value.
+            </summary>
+        </member>
+        <member name="T:POS.Domain.ValueObjects.PasswordHash">
+            <summary>
+            PasswordHash value object stores hashed passwords securely.
+            Never stores plain text passwords.
+            </summary>
+        </member>
+        <member name="M:POS.Domain.ValueObjects.PasswordHash.#ctor(System.String)">
+            <summary>
+            Password must be provided already hashed (using BCrypt or similar).
+            </summary>
+        </member>
+        <member name="T:POS.Domain.Enums.PermissionType">
+            <summary>
+            Defines all permission types that can be assigned to users.
+            These are constants to avoid magic strings throughout the application.
+            </summary>
+        </member>
+        <member name="T:POS.Domain.Enums.UserRole">
+            <summary>
+            Defines all user roles in the POS system.
+            These are constants to avoid magic strings throughout the application.
+            </summary>
+        </member>
+        <!-- Badly formed XML comment ignored for member "T:POS.Domain.Interfaces.Repositories.IUserRepository" -->
+        <member name="M:POS.Domain.Interfaces.Repositories.IUserRepository.GetByIdAsync(System.Guid,System.Threading.CancellationToken)">
+            <summary>
+            Finds a user by ID.
+            </summary>
+        </member>
+        <member name="M:POS.Domain.Interfaces.Repositories.IUserRepository.FindByEmailAsync(POS.Domain.ValueObjects.Email,System.Threading.CancellationToken)">
+            <summary>
+            Finds a user by email address.
+            </summary>
+        </member>
+        <member name="M:POS.Domain.Interfaces.Repositories.IUserRepository.FindByEmailAsync(System.String,System.Threading.CancellationToken)">
+            <summary>
+            Finds a user by email string.
+            </summary>
+        </member>
+        <member name="M:POS.Domain.Interfaces.Repositories.IUserRepository.GetActiveUsersAsync(System.Threading.CancellationToken)">
+            <summary>
+            Gets all active users.
+            </summary>
+        </member>
+        <member name="M:POS.Domain.Interfaces.Repositories.IUserRepository.GetInactiveUsersAsync(System.Threading.CancellationToken)">
+            <summary>
+            Gets all inactive users.
+            </summary>
+        </member>
+        <member name="M:POS.Domain.Interfaces.Repositories.IUserRepository.EmailExistsAsync(POS.Domain.ValueObjects.Email,System.Threading.CancellationToken)">
+            <summary>
+            Checks if an email is already in use.
+            </summary>
+        </member>
+        <member name="M:POS.Domain.Interfaces.Repositories.IUserRepository.EmailExistsAsync(POS.Domain.ValueObjects.Email,System.Guid,System.Threading.CancellationToken)">
+            <summary>
+            Checks if an email is already in use (excluding a specific user).
+            </summary>
+        </member>
+        <member name="M:POS.Domain.Interfaces.Repositories.IUserRepository.AddAsync(POS.Domain.Aggregates.UserManagement.User,System.Threading.CancellationToken)">
+            <summary>
+            Adds a user to the repository.
+            </summary>
+        </member>
+        <member name="M:POS.Domain.Interfaces.Repositories.IUserRepository.Update(POS.Domain.Aggregates.UserManagement.User)">
+            <summary>
+            Updates an existing user.
+            </summary>
+        </member>
+        <member name="P:POS.Domain.Interfaces.Repositories.IUserRepository.UnitOfWork">
+            <summary>
+            Gets the unit of work for this repository.
+            </summary>
+        </member>
+    </members>
+</doc>

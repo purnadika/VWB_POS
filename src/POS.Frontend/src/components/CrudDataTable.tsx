@@ -1,5 +1,5 @@
 import React, { useState, useEffect, createContext, useContext } from 'react';
-
+import { useTranslation } from 'react-i18next';
 import { Plus, Edit2, Trash2, X } from 'lucide-react';
 import { fetchApi } from '../utils/api';
 import '../pages/AdminPages.css';
@@ -33,6 +33,7 @@ export function CrudDataTable<T extends Record<string, any>>({
   formFields,
   primaryKey = 'id',
 }: CrudDataTableProps<T>) {
+  const { t } = useTranslation();
   const [data, setData] = useState<T[]>([]);
   const [loading, setLoading] = useState(true);
   
@@ -65,7 +66,7 @@ export function CrudDataTable<T extends Record<string, any>>({
   }, [endpoint]);
 
   const handleDelete = async (id: any) => {
-    if (!confirm(`Are you sure you want to delete this ${title.toLowerCase().slice(0, -1)}?`)) return;
+    if (!confirm(`${t('Are you sure you want to delete this')} ${t(title).toLowerCase().slice(0, -1)}?`)) return;
     try {
       await fetchApi(`${endpoint}/${id}`, { method: 'DELETE' });
       await loadData();
@@ -121,7 +122,7 @@ export function CrudDataTable<T extends Record<string, any>>({
       await loadData();
     } catch (err: any) {
       console.error(err);
-      setError(err.message || 'Failed to save data.');
+      setError(err.message || t('Failed to save data.'));
     } finally {
       setSaving(false);
     }
@@ -130,11 +131,13 @@ export function CrudDataTable<T extends Record<string, any>>({
   return (
     <div className="admin-page">
       <div className="page-header">
-        <h2>{title}</h2>
-        <button className="btn btn-primary" onClick={() => openModal()}>
-          <Plus size={16} />
-          New {title.slice(0, -1)}
-        </button>
+        <h2>{t(title)}</h2>
+        {formFields && formFields.length > 0 && (
+          <button className="btn btn-primary" onClick={() => openModal()}>
+            <Plus size={16} />
+            {t('New')} {t(title).slice(0, -1)}
+          </button>
+        )}
       </div>
 
       <div className="table-container">
@@ -142,16 +145,16 @@ export function CrudDataTable<T extends Record<string, any>>({
           <thead>
             <tr>
               {columns.map((col, i) => (
-                <th key={i}>{col.header}</th>
+                <th key={i}>{t(col.header)}</th>
               ))}
-              <th>Actions</th>
+              {formFields && formFields.length > 0 && <th>{t('Actions')}</th>}
             </tr>
           </thead>
           <tbody>
             {loading ? (
-              <tr><td colSpan={columns.length + 1} style={{ textAlign: 'center' }}>Loading...</td></tr>
+              <tr><td colSpan={columns.length + (formFields?.length ? 1 : 0)} style={{ textAlign: 'center' }}>{t('Loading...')}</td></tr>
             ) : data.length === 0 ? (
-              <tr><td colSpan={columns.length + 1} style={{ textAlign: 'center' }}>No records found</td></tr>
+              <tr><td colSpan={columns.length + (formFields?.length ? 1 : 0)} style={{ textAlign: 'center' }}>{t('No records found')}</td></tr>
             ) : (
               data.map((row, rowIndex) => (
                 <tr key={row[primaryKey] || rowIndex}>
@@ -160,16 +163,18 @@ export function CrudDataTable<T extends Record<string, any>>({
                       {col.render ? col.render(row) : (row[col.key as keyof T] as React.ReactNode)}
                     </td>
                   ))}
-                  <td>
-                    <div className="action-buttons">
-                      <button className="btn-icon" aria-label="Edit" onClick={() => openModal(row)}>
-                        <Edit2 size={16} />
-                      </button>
-                      <button className="btn-icon text-danger" aria-label="Delete" onClick={() => handleDelete(row[primaryKey])}>
-                        <Trash2 size={16} />
-                      </button>
-                    </div>
-                  </td>
+                  {formFields && formFields.length > 0 && (
+                    <td>
+                      <div className="action-buttons">
+                        <button className="btn-icon" aria-label="Edit" onClick={() => openModal(row)}>
+                          <Edit2 size={16} />
+                        </button>
+                        <button className="btn-icon text-danger" aria-label="Delete" onClick={() => handleDelete(row[primaryKey])}>
+                          <Trash2 size={16} />
+                        </button>
+                      </div>
+                    </td>
+                  )}
                 </tr>
               ))
             )}
@@ -181,7 +186,7 @@ export function CrudDataTable<T extends Record<string, any>>({
         <div className="modal-overlay">
           <div className="modal-content">
             <div className="modal-header">
-              <h3>{editingItem ? 'Edit' : 'New'} {title.slice(0, -1)}</h3>
+              <h3>{editingItem ? t('Edit') : t('New')} {t(title).slice(0, -1)}</h3>
               <button className="btn-icon" onClick={closeModal}>
                 <X size={20} />
               </button>
@@ -191,7 +196,7 @@ export function CrudDataTable<T extends Record<string, any>>({
                 {error && <div className="alert-error" style={{ color: 'red', marginBottom: '16px', padding: '10px', backgroundColor: '#ffebee', borderRadius: '4px' }}>{error}</div>}
                 {formFields.map((field) => (
                   <div className="form-group" key={field.name}>
-                    <label htmlFor={`field-${field.name}`}>{field.label}</label>
+                    <label htmlFor={`field-${field.name}`}>{t(field.label)}</label>
                     {field.type === 'select' ? (
                       <select
                         id={`field-${field.name}`}
@@ -200,7 +205,7 @@ export function CrudDataTable<T extends Record<string, any>>({
                         onChange={(e) => handleInputChange(field.name, e.target.value, field.type)}
                         className="form-control"
                       >
-                        <option value="">Select an option</option>
+                        <option value="">{t('Select an option')}</option>
                         {field.options?.map((opt, i) => (
                           <option key={i} value={opt.value}>
                             {opt.label}
@@ -227,9 +232,9 @@ export function CrudDataTable<T extends Record<string, any>>({
                 ))}
               </div>
               <div className="modal-footer">
-                <button type="button" className="btn" onClick={closeModal} disabled={saving}>Cancel</button>
+                <button type="button" className="btn" onClick={closeModal} disabled={saving}>{t('Cancel')}</button>
                 <button type="submit" className="btn btn-primary" disabled={saving}>
-                  {saving ? 'Saving...' : 'Save'}
+                  {saving ? t('Saving...') : t('Save')}
                 </button>
               </div>
             </form>

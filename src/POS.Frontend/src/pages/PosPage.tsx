@@ -1,6 +1,6 @@
-﻿import React, { useState, useEffect, createContext, useContext } from 'react';
-
-import { Search, Plus, Minus, Trash2, CreditCard } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
+import { Search, Plus, Minus, Trash2, CreditCard, X } from 'lucide-react';
 import type { Item, SaleItem } from '../types';
 import { fetchApi } from '../utils/api';
 import { useLocale } from '../contexts/LocaleContext';
@@ -11,12 +11,17 @@ export function PosPage() {
   const [search, setSearch] = useState('');
   const [cart, setCart] = useState<SaleItem[]>([]);
   const [checkoutMsg, setCheckoutMsg] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+  
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
+  const [tenderedAmount, setTenderedAmount] = useState<number | ''>('');
+  const [processing, setProcessing] = useState(false);
+  
   const { formatCurrency } = useLocale();
+  const { t } = useTranslation();
 
   useEffect(() => {
     fetchApi<{ data: Item[] }>('/items')
       .then((res) => {
-        // Ensure data is array
         if (Array.isArray(res.data)) {
           setItems(res.data);
         } else if (Array.isArray(res)) {
@@ -70,27 +75,34 @@ export function PosPage() {
   };
 
   const subtotal = cart.reduce((sum, item) => sum + item.itemUnitPrice * item.quantity, 0);
-  const tax = subtotal * 0.1; // Hardcoded 10% tax for demo
+  const tax = subtotal * 0.1;
   const total = subtotal + tax;
 
-  const handleCheckout = async () => {
+  const handleCheckoutClick = () => {
     if (cart.length === 0) return;
+    setTenderedAmount('');
+    setShowPaymentModal(true);
+  };
+
+  const handleCheckout = async (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    if (cart.length === 0) return;
+    if (typeof tenderedAmount !== 'number' || tenderedAmount < total) return;
     
+    setProcessing(true);
     try {
-      // Map cart to SaleItemDto format expected by the backend
       const saleItems = cart.map((item) => ({
         itemId: item.itemId,
         quantity: item.quantity,
         discountPercent: item.discount,
         unitPriceOverride: item.itemUnitPrice,
-        serialNumber: '', // Provide empty string to satisfy validation
-        locationId: 1 // Default location
+        serialNumber: '',
+        locationId: 1
       }));
 
-      // Map payments to SalePaymentDto format expected by the backend
       const payments = [
         {
-          paymentMethod: 0, // 0 = Cash based on backend enum
+          paymentMethod: 0,
           amount: total
         }
       ];
@@ -98,18 +110,21 @@ export function PosPage() {
       await fetchApi('/sales', {
         method: 'POST',
         body: JSON.stringify({
-          employeeId: 1, // Default employee
+          employeeId: 1,
           comment: 'POS Sale',
           saleItems: saleItems,
           payments: payments
         })
       });
       setCart([]);
-      setCheckoutMsg({ type: 'success', text: 'Sale completed successfully!' });
+      setShowPaymentModal(false);
+      setCheckoutMsg({ type: 'success', text: t('Sale completed successfully!') });
       setTimeout(() => setCheckoutMsg(null), 4000);
     } catch (err: any) {
       console.error(err);
-      setCheckoutMsg({ type: 'error', text: err.message || 'Checkout failed. Please try again.' });
+      setCheckoutMsg({ type: 'error', text: err.message || t('Checkout failed. Please try again.') });
+    } finally {
+      setProcessing(false);
     }
   };
 
@@ -123,14 +138,13 @@ export function PosPage() {
           {checkoutMsg.text}
         </div>
       )}
-      {/* Left Area: Product Selection */}
       <div className="pos-products">
         <div className="search-bar">
           <Search size={20} className="search-icon" />
           <input
             type="text"
             className="input search-input"
-            placeholder="Search items..."
+            placeholder={t('Search items...')}
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
@@ -148,20 +162,19 @@ export function PosPage() {
             </button>
           ))}
           {filteredItems.length === 0 && (
-            <div className="empty-state">No items found</div>
+            <div className="empty-state">{t('No items found')}</div>
           )}
         </div>
       </div>
 
-      {/* Right Area: Cart / Checkout Panel (Inverted Metro Style) */}
       <div className="pos-cart">
         <div className="cart-header">
-          <h3>Current Sale</h3>
+          <h3>{t('Current Sale')}</h3>
         </div>
         
         <div className="cart-items">
           {cart.length === 0 ? (
-            <div className="cart-empty">Cart is empty</div>
+            <div className="cart-empty">{t('Cart is empty')}</div>
           ) : (
             cart.map((item) => (
               <div key={item.itemId} className="cart-item">
@@ -188,28 +201,80 @@ export function PosPage() {
 
         <div className="cart-summary">
           <div className="summary-row">
-            <span>Subtotal</span>
+            <span>{t('Subtotal')}</span>
             <span>{formatCurrency(subtotal)}</span>
           </div>
           <div className="summary-row">
-            <span>Tax (10%)</span>
+            <span>{t('Tax (10%)')}</span>
             <span>{formatCurrency(tax)}</span>
           </div>
           <div className="summary-row total-row">
-            <span>Total</span>
+            <span>{t('Total')}</span>
             <span>{formatCurrency(total)}</span>
           </div>
           
           <button 
             className="btn btn-primary btn-checkout" 
             disabled={cart.length === 0}
-            onClick={handleCheckout}
+            onClick={handleCheckoutClick}
           >
             <CreditCard size={20} />
-            Pay {formatCurrency(total)}
+            {t('Checkout')} {formatCurrency(total)}
           </button>
         </div>
       </div>
+
+      {showPaymentModal && (
+        <div className="pos-modal-overlay">
+          <div className="pos-modal-content">
+            <div className="pos-modal-header">
+              <h3>{t('Payment')}</h3>
+              <button className="btn-icon" onClick={() => setShowPaymentModal(false)}>
+                <X size={20} />
+              </button>
+            </div>
+            <form onSubmit={handleCheckout}>
+              <div className="pos-modal-body">
+                <div className="summary-row">
+                  <span>{t('Total Due')}</span>
+                  <span className="total-row">{formatCurrency(total)}</span>
+                </div>
+                
+                <div className="payment-input-group">
+                  <label>{t('Tendered Amount')}</label>
+                  <input 
+                    type="number"
+                    step="0.01"
+                    min={total}
+                    required
+                    className="payment-input"
+                    value={tenderedAmount}
+                    onChange={(e) => setTenderedAmount(e.target.value ? parseFloat(e.target.value) : '')}
+                    autoFocus
+                  />
+                </div>
+
+                {typeof tenderedAmount === 'number' && tenderedAmount >= total && (
+                  <div className="summary-row" style={{ color: '#2e7d32', fontWeight: 'bold' }}>
+                    <span>{t('Change')} (Kembalian)</span>
+                    <span>{formatCurrency(tenderedAmount - total)}</span>
+                  </div>
+                )}
+              </div>
+              <div className="pos-modal-footer">
+                <button type="button" className="btn" onClick={() => setShowPaymentModal(false)} disabled={processing}>{t('Cancel')}</button>
+                <button 
+                  type="submit" 
+                  className="btn btn-primary" 
+                  disabled={processing || typeof tenderedAmount !== 'number' || tenderedAmount < total}
+                >
+                  {processing ? t('Processing...') : t('Confirm Payment')}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

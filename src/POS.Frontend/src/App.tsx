@@ -1,4 +1,4 @@
-﻿
+
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { PosLayout } from './layouts/PosLayout';
 import { AdminLayout } from './layouts/AdminLayout';
@@ -13,6 +13,7 @@ import { GiftCardsPage } from './pages/GiftCardsPage';
 import { MessagesPage } from './pages/MessagesPage';
 import { ExpensesPage } from './pages/ExpensesPage';
 import { ReceivingsPage } from './pages/ReceivingsPage';
+import { SalesPage } from './pages/SalesPage';
 import { ReportsPage } from './pages/ReportsPage';
 import { TaxesPage } from './pages/TaxesPage';
 import { SettingsPage } from './pages/SettingsPage';
@@ -21,6 +22,7 @@ import { LoginPage } from './pages/LoginPage';
 import { ProtectedRoute } from './components/ProtectedRoute';
 import { AuthProvider } from './contexts/AuthContext';
 import { LocaleProvider } from './contexts/LocaleContext';
+import './i18n';
 
 function App() {
   return (
@@ -47,6 +49,7 @@ function App() {
               <Route path="employees" element={<EmployeesPage />} />
               <Route path="gift-cards" element={<GiftCardsPage />} />
               <Route path="messages" element={<MessagesPage />} />
+              <Route path="sales" element={<SalesPage />} />
               <Route path="expenses" element={<ExpensesPage />} />
               <Route path="receivings" element={<ReceivingsPage />} />
               <Route path="reports" element={<ReportsPage />} />

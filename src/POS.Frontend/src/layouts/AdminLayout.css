@@ -43,6 +43,17 @@
   padding: 0 var(--spacing-sm);
   flex: 1;
   gap: 2px;
+  overflow-y: auto;
+}
+
+.nav-group-title {
+  padding: var(--spacing-md) var(--spacing-md) var(--spacing-xs) var(--spacing-md);
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--color-panel-text-muted);
+  opacity: 0.7;
 }
 
 .nav-item {
@@ -75,7 +86,7 @@
 .nav-divider {
   height: 1px;
   background-color: var(--color-panel-border);
-  margin: var(--spacing-md) 0;
+  margin: var(--spacing-sm) 0;
 }
 
 .sidebar-footer {

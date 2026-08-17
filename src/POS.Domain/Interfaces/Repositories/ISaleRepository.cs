@@ -11,4 +11,5 @@ public interface ISaleRepository : IRepository<Sale>
     Task<Sale?> GetByInvoiceNumberAsync(string invoiceNumber, CancellationToken cancellationToken = default);
     Task<IReadOnlyList<Sale>> GetSuspendedSalesAsync(CancellationToken cancellationToken = default);
     Task<IReadOnlyList<Sale>> GetSalesRangeAsync(DateTime startDate, DateTime endDate, CancellationToken cancellationToken = default);
+    Task<IReadOnlyList<Sale>> GetAllWithDetailsAsync(CancellationToken cancellationToken = default);
 }

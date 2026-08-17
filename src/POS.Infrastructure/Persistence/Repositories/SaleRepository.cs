@@ -56,4 +56,12 @@ public class SaleRepository : Repository<Sale>, ISaleRepository
             .Where(s => s.SaleTime >= startDate && s.SaleTime <= endDate)
             .ToListAsync(cancellationToken);
     }
+
+    public async Task<IReadOnlyList<Sale>> GetAllWithDetailsAsync(CancellationToken cancellationToken = default)
+    {
+        return await DbContext.Sales
+            .Include(s => s.Customer)
+            .Include(s => s.Employee)
+            .ToListAsync(cancellationToken);
+    }
 }

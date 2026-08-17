@@ -4,6 +4,7 @@ import { Search, Plus, Minus, Trash2, CreditCard, X } from 'lucide-react';
 import type { Item, SaleItem } from '../types';
 import { fetchApi } from '../utils/api';
 import { useLocale } from '../contexts/LocaleContext';
+import { ReceiptModal } from '../components/ReceiptModal';
 import './PosPage.css';
 
 export function PosPage() {
@@ -11,10 +12,14 @@ export function PosPage() {
   const [search, setSearch] = useState('');
   const [cart, setCart] = useState<SaleItem[]>([]);
   const [checkoutMsg, setCheckoutMsg] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+  const [customers, setCustomers] = useState<{ id: number; firstName: string; lastName: string }[]>([]);
+  const [selectedCustomer, setSelectedCustomer] = useState<number | ''>('');
   
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [tenderedAmount, setTenderedAmount] = useState<number | ''>('');
   const [processing, setProcessing] = useState(false);
+  
+  const [receiptData, setReceiptData] = useState<any>(null);
   
   const { formatCurrency } = useLocale();
   const { t } = useTranslation();
@@ -29,6 +34,16 @@ export function PosPage() {
         }
       })
       .catch((err) => console.error('Error fetching items', err));
+      
+    fetchApi<{ data: { id: number; firstName: string; lastName: string }[] } | { id: number; firstName: string; lastName: string }[]>('/customers')
+      .then(res => {
+        if (res && typeof res === 'object' && 'data' in res && Array.isArray(res.data)) {
+          setCustomers(res.data);
+        } else if (Array.isArray(res)) {
+          setCustomers(res);
+        }
+      })
+      .catch(console.error);
   }, []);
 
   const filteredItems = items.filter(
@@ -107,15 +122,29 @@ export function PosPage() {
         }
       ];
 
-      await fetchApi('/sales', {
+      const res = await fetchApi<{ data: number } | number>('/sales', {
         method: 'POST',
         body: JSON.stringify({
+          customerId: selectedCustomer === '' ? null : selectedCustomer,
           employeeId: 1,
           comment: 'POS Sale',
           saleItems: saleItems,
           payments: payments
         })
       });
+      
+      const saleId = (res && typeof res === 'object' && 'data' in res) ? res.data : (res as number);
+      
+      const customerObj = customers.find(c => c.id === selectedCustomer);
+      setReceiptData({
+        saleId: saleId,
+        cart: [...cart],
+        total: total,
+        tendered: tenderedAmount,
+        change: tenderedAmount - total,
+        customerName: customerObj ? `${customerObj.firstName} ${customerObj.lastName}` : 'Walk-in Customer'
+      });
+
       setCart([]);
       setShowPaymentModal(false);
       setCheckoutMsg({ type: 'success', text: t('Sale completed successfully!') });
@@ -169,7 +198,19 @@ export function PosPage() {
 
       <div className="pos-cart">
         <div className="cart-header">
-          <h3>{t('Current Sale')}</h3>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <h3>{t('Current Sale')}</h3>
+            <select 
+              value={selectedCustomer} 
+              onChange={(e) => setSelectedCustomer(e.target.value ? Number(e.target.value) : '')}
+              style={{ padding: '4px', borderRadius: '4px', border: '1px solid var(--color-border)' }}
+            >
+              <option value="">{t('Walk-in Customer')}</option>
+              {customers.map(c => (
+                <option key={c.id} value={c.id}>{c.firstName} {c.lastName}</option>
+              ))}
+            </select>
+          </div>
         </div>
         
         <div className="cart-items">
@@ -274,6 +315,18 @@ export function PosPage() {
             </form>
           </div>
         </div>
+      )}
+
+      {receiptData && (
+        <ReceiptModal
+          saleId={receiptData.saleId}
+          cart={receiptData.cart}
+          total={receiptData.total}
+          tendered={receiptData.tendered}
+          change={receiptData.change}
+          customerName={receiptData.customerName}
+          onClose={() => setReceiptData(null)}
+        />
       )}
     </div>
   );

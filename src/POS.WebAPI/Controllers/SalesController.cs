@@ -27,6 +27,16 @@ public class SalesController : ControllerBase
         return Ok(result.Value);
     }
 
+    [HttpGet]
+    public async Task<IActionResult> Get()
+    {
+        var result = await _sender.Send(new GetSalesQuery());
+        if (result.IsFailure)
+            return BadRequest(result.Error);
+
+        return Ok(result.Value);
+    }
+
     [HttpGet("{id:int}")]
     public async Task<IActionResult> GetById(int id)
     {

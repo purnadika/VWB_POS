@@ -180,16 +180,22 @@ export function PosPage() {
         </div>
         
         <div className="product-grid">
-          {filteredItems.map((item) => (
-            <button
-              key={item.id}
-              className="product-card"
-              onClick={() => addToCart(item)}
-            >
-              <div className="product-name">{item.name}</div>
-              <div className="product-price">{formatCurrency(item.unitPrice)}</div>
-            </button>
-          ))}
+          {filteredItems.map((item) => {
+            const qty = item.itemQuantities?.reduce((sum, iq) => sum + iq.quantity, 0) || 0;
+            return (
+              <button
+                key={item.id}
+                className="product-card"
+                onClick={() => addToCart(item)}
+              >
+                <div className="product-name">{item.name}</div>
+                <div className="product-price">{formatCurrency(item.unitPrice)}</div>
+                <div className="product-qty" style={{ fontSize: '0.8rem', color: qty > 0 ? 'green' : 'red' }}>
+                  {t('Stock')}: {qty}
+                </div>
+              </button>
+            );
+          })}
           {filteredItems.length === 0 && (
             <div className="empty-state">{t('No items found')}</div>
           )}

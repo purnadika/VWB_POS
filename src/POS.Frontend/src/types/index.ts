@@ -1,4 +1,4 @@
-﻿export interface Item {
+export interface Item {
   id: number;
   name: string;
   category: string;
@@ -12,6 +12,7 @@
   stockType: number;
   itemType: number;
   deleted: boolean;
+  itemQuantities?: { locationId: number; quantity: number }[];
 }
 
 export interface Customer {

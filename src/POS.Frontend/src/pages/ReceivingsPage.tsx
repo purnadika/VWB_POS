@@ -63,7 +63,13 @@ export function ReceivingsPage() {
       required: true,
       options: employees.map(e => ({ label: `${e.firstName} ${e.lastName}`, value: e.id }))
     },
-    { name: 'receivingTime', label: 'Receiving Time', type: 'date', required: true },
+    { 
+      name: 'receivingTime', 
+      label: 'Receiving Time', 
+      type: 'date', 
+      required: true,
+      defaultValue: new Date().toISOString().split('T')[0]
+    },
     { name: 'comment', label: 'Comment', type: 'text' },
     { name: 'reference', label: 'Reference', type: 'text' },
     { name: 'paymentType', label: 'Payment Type', type: 'text', required: true },

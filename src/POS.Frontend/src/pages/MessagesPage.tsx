@@ -2,9 +2,22 @@ import { useState, useEffect } from 'react';
 import { CrudDataTable } from '../components/CrudDataTable';
 import type { ColumnDef, FormFieldDef } from '../components/CrudDataTable';
 import { fetchApi } from '../utils/api';
+import { useAuth } from '../contexts/AuthContext';
 
 export function MessagesPage() {
+  const { token } = useAuth();
   const [employees, setEmployees] = useState<{ id: number; firstName: string; lastName: string }[]>([]);
+  
+  let currentUserId: number | null = null;
+  if (token) {
+    try {
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      // The ClaimTypes.NameIdentifier is usually 'http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier'
+      // Or 'nameid' or 'sub'. Let's check typical ones.
+      const userIdStr = payload['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier'] || payload.nameid || payload.sub;
+      if (userIdStr) currentUserId = parseInt(userIdStr, 10);
+    } catch(e) {}
+  }
 
   useEffect(() => {
     fetchApi<{ data: { id: number; firstName: string; lastName: string }[] } | { id: number; firstName: string; lastName: string }[]>('/employees')
@@ -45,18 +58,25 @@ export function MessagesPage() {
       label: 'Sender', 
       type: 'select', 
       required: true,
-      options: employees.map(e => ({ label: `${e.firstName} ${e.lastName}`, value: e.id }))
+      options: employees.map(e => ({ label: `${e.firstName} ${e.lastName}`, value: e.id })),
+      defaultValue: currentUserId
     },
     { 
       name: 'receiverId', 
       label: 'Receiver', 
       type: 'select', 
       required: true,
-      options: employees.map(e => ({ label: `${e.firstName} ${e.lastName}`, value: e.id }))
+      options: employees.filter(e => e.id !== currentUserId).map(e => ({ label: `${e.firstName} ${e.lastName}`, value: e.id }))
     },
     { name: 'subject', label: 'Subject', type: 'text', required: true },
-    { name: 'body', label: 'Body', type: 'text', required: true },
-    { name: 'sentAt', label: 'Sent At', type: 'date', required: true }
+    { name: 'body', label: 'Body', type: 'textarea', required: true },
+    { 
+      name: 'sentAt', 
+      label: 'Sent At', 
+      type: 'date', 
+      required: true,
+      defaultValue: new Date().toISOString().split('T')[0]
+    }
   ];
 
   return (

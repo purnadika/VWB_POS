@@ -73,4 +73,14 @@ public class ItemRepository : Repository<Item>, IItemRepository
         };
         await DbContext.InventoryTransactions.AddAsync(transaction, cancellationToken);
     }
+
+    public async Task<IReadOnlyList<Item>> GetAllWithDetailsAsync(CancellationToken cancellationToken = default)
+    {
+        return await DbContext.Items
+            .Include(i => i.Supplier)
+            .Include(i => i.TaxCategory)
+            .Include(i => i.ItemQuantities).ThenInclude(iq => iq.Location)
+            .Include(i => i.AttributeLinks).ThenInclude(al => al.Attribute)
+            .ToListAsync(cancellationToken);
+    }
 }

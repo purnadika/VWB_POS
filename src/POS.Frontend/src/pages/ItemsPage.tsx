@@ -23,6 +23,7 @@ export function ItemsPage() {
     { key: 'categoryId', header: 'Category', render: (row) => categories.find(c => c.id === row.categoryId)?.name || row.categoryId },
     { key: 'costPrice', header: 'Cost Price' },
     { key: 'unitPrice', header: 'Unit Price' },
+    { key: 'itemQuantities', header: 'Stock', render: (row) => row.itemQuantities?.reduce((sum: number, iq: any) => sum + iq.quantity, 0) || 0 },
   ];
 
   const formFields: FormFieldDef[] = [

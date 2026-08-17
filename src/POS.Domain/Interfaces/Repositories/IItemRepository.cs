@@ -9,4 +9,5 @@ public interface IItemRepository : IRepository<Item>
     Task<Item?> GetByItemNumberAsync(string itemNumber, CancellationToken cancellationToken = default);
     Task<decimal> GetStockLevelAsync(int itemId, int locationId, CancellationToken cancellationToken = default);
     Task UpdateStockLevelAsync(int itemId, int locationId, decimal quantityChange, CancellationToken cancellationToken = default);
+    Task<IReadOnlyList<Item>> GetAllWithDetailsAsync(CancellationToken cancellationToken = default);
 }

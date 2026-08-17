@@ -17,6 +17,8 @@ import { SalesPage } from './pages/SalesPage';
 import { ReportsPage } from './pages/ReportsPage';
 import { TaxesPage } from './pages/TaxesPage';
 import { SettingsPage } from './pages/SettingsPage';
+import { ExpenseCategoriesPage } from './pages/ExpenseCategoriesPage';
+import { TaxCategoriesPage } from './pages/TaxCategoriesPage';
 
 import { LoginPage } from './pages/LoginPage';
 import { ProtectedRoute } from './components/ProtectedRoute';
@@ -51,9 +53,11 @@ function App() {
               <Route path="messages" element={<MessagesPage />} />
               <Route path="sales" element={<SalesPage />} />
               <Route path="expenses" element={<ExpensesPage />} />
+              <Route path="expense-categories" element={<ExpenseCategoriesPage />} />
               <Route path="receivings" element={<ReceivingsPage />} />
               <Route path="reports" element={<ReportsPage />} />
               <Route path="taxes" element={<TaxesPage />} />
+              <Route path="tax-categories" element={<TaxCategoriesPage />} />
               <Route path="settings" element={<SettingsPage />} />
             </Route>
           </Route>

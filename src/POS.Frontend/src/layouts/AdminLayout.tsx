@@ -68,6 +68,10 @@ export function AdminLayout() {
             <Settings size={18} />
             {t('Expenses')}
           </NavLink>
+          <NavLink to="/admin/expense-categories" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>
+            <Settings size={18} />
+            {t('Expense Categories')}
+          </NavLink>
           <NavLink to="/admin/receivings" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>
             <ShoppingCart size={18} />
             {t('Receivings')}
@@ -75,6 +79,10 @@ export function AdminLayout() {
           <NavLink to="/admin/taxes" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>
             <Settings size={18} />
             {t('Taxes')}
+          </NavLink>
+          <NavLink to="/admin/tax-categories" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>
+            <Settings size={18} />
+            {t('Tax Categories')}
           </NavLink>
 
           <div className="nav-divider"></div>

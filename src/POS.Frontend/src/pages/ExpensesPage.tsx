@@ -60,7 +60,18 @@ export function ExpensesPage() {
       options: categories.map(c => ({ label: c.categoryName, value: c.id }))
     },
     { name: 'amount', label: 'Amount ($)', type: 'number', required: true },
-    { name: 'paymentType', label: 'Payment Type', type: 'text', required: true },
+    { 
+      name: 'paymentType', 
+      label: 'Payment Type', 
+      type: 'select', 
+      required: true,
+      options: [
+        { label: 'Cash', value: 'Cash' },
+        { label: 'Credit Card', value: 'Credit Card' },
+        { label: 'Debit Card', value: 'Debit Card' },
+        { label: 'Check', value: 'Check' }
+      ]
+    },
     { name: 'description', label: 'Description', type: 'text' },
     { 
       name: 'employeeId', 
@@ -69,7 +80,13 @@ export function ExpensesPage() {
       required: true,
       options: employees.map(e => ({ label: `${e.firstName} ${e.lastName}`, value: e.id }))
     },
-    { name: 'date', label: 'Date', type: 'date', required: true }
+    { 
+      name: 'date', 
+      label: 'Date', 
+      type: 'date', 
+      required: true,
+      defaultValue: new Date().toISOString().split('T')[0]
+    }
   ];
 
   return (

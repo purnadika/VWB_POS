@@ -13,16 +13,16 @@ public record GetItemsQuery() : IRequest<Result<List<Item>>>;
 
 public class GetItemsQueryHandler : IRequestHandler<GetItemsQuery, Result<List<Item>>>
 {
-    private readonly IRepository<Item> _repository;
+    private readonly IItemRepository _repository;
 
-    public GetItemsQueryHandler(IRepository<Item> repository)
+    public GetItemsQueryHandler(IItemRepository repository)
     {
         _repository = repository;
     }
 
     public async Task<Result<List<Item>>> Handle(GetItemsQuery request, CancellationToken cancellationToken)
     {
-        var items = await _repository.GetAllAsync(cancellationToken);
+        var items = await _repository.GetAllWithDetailsAsync(cancellationToken);
         return Result.Success(items.Where(i => !i.Deleted).ToList());
     }
 }

@@ -13,9 +13,10 @@ export interface ColumnDef<T> {
 export interface FormFieldDef {
   name: string;
   label: string;
-  type: 'text' | 'number' | 'email' | 'checkbox' | 'date' | 'select';
+  type: 'text' | 'number' | 'email' | 'checkbox' | 'date' | 'select' | 'textarea';
   required?: boolean;
   options?: { label: string; value: any }[];
+  defaultValue?: any;
 }
 
 interface CrudDataTableProps<T> {
@@ -82,7 +83,13 @@ export function CrudDataTable<T extends Record<string, any>>({
       setFormData({ ...item });
     } else {
       setEditingItem(null);
-      setFormData({});
+      const defaultData: Record<string, any> = {};
+      formFields.forEach(f => {
+        if (f.defaultValue !== undefined) {
+          defaultData[f.name] = f.defaultValue;
+        }
+      });
+      setFormData(defaultData);
     }
     setIsModalOpen(true);
   };
@@ -212,6 +219,15 @@ export function CrudDataTable<T extends Record<string, any>>({
                           </option>
                         ))}
                       </select>
+                    ) : field.type === 'textarea' ? (
+                      <textarea
+                        id={`field-${field.name}`}
+                        required={field.required}
+                        value={formData[field.name] ?? ''}
+                        onChange={(e) => handleInputChange(field.name, e.target.value, field.type)}
+                        className="form-control"
+                        rows={4}
+                      />
                     ) : (
                       <input
                         id={`field-${field.name}`}
